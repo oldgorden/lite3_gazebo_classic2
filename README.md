@@ -3,7 +3,7 @@ Lite3 simulation on Gazebo Classic (ROS 2 Humble). Adapted from https://github.c
 
 ## 环境要求 (Prerequisites)
 * **Ubuntu 22.04 LTS**
-* **ROS 2 Humble Hawksbill**
+* **ROS 2 Humble**
 * **Gazebo Classic 11**
 
 ## 下载源码 (Download)
