@@ -5,7 +5,7 @@ Lite3 simulation on Gazebo Classic (ROS 2 Humble). Adapted from https://github.c
 ### 环境依赖
 - **Ubuntu 22.04** 
 - **ROS 2 Humble** 
-- **Gazebo Classic**
+- **Gazebo Classic 11**
 
 ## 工作空间设置 (Workspace Setup)
 
