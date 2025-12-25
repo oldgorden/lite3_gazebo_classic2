@@ -8,6 +8,8 @@ log/
 *.pyo
 *.pyd
 __pycache__/
+*.o
+*.so
 
 # IDE files
 .vscode/
@@ -25,7 +27,6 @@ Thumbs.db
 *.action
 
 # Binary files
-*.so
 *.dll
 *.exe
 
@@ -33,6 +34,7 @@ Thumbs.db
 *~
 *.tmp
 *.temp
+*.swp
 
 # Documentation
 docs/_build/
