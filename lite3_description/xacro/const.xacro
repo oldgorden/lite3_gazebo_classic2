@@ -38,4 +38,16 @@
   <xacro:property name="foot_mass" value="0.08179029876178574"/>
   <xacro:property name="foot_radius" value="0.013"/>
 
+  <!-- shank -->
+  <xacro:property name="shank_mass" value="0.1567647392934227"/>
+  <xacro:property name="shank_com_x" value="0.00585"/>
+  <xacro:property name="shank_com_y" value="-8.732e-07"/>
+  <xacro:property name="shank_com_z" value="-0.12"/>
+  <xacro:property name="shank_ixx" value="9.104550629239001e-04"/>
+  <xacro:property name="shank_ixy" value="-1.690647476476001e-08"/>
+  <xacro:property name="shank_ixz" value="9.41971624706656e-06"/>
+  <xacro:property name="shank_iyy" value="9.353157488964166e-04"/>
+  <xacro:property name="shank_iyz" value="7.70211998592336e-09"/>
+  <xacro:property name="shank_izz" value="4.30081045672405e-05"/>
+
 </robot>

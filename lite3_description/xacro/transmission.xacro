@@ -12,21 +12,21 @@
         <mechanicalReduction>1</mechanicalReduction>
       </actuator>
     </transmission>
-    <transmission name="{name}_HipY_tran">
+    <transmission name="${name}_HipY_tran">
       <type>transmission_interface/SimpleTransmission</type>
-      <joint name="{name}_HipY">
+      <joint name="${name}_HipY">
         <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
       </joint>
-      <actuator name="{name}_HipY_motor">
+      <actuator name="${name}_HipY_motor">
         <mechanicalReduction>1</mechanicalReduction>
       </actuator>
     </transmission>
-    <transmission name="{name}_Knee_tran">
+    <transmission name="${name}_Knee_tran">
       <type>transmission_interface/SimpleTransmission</type>
-      <joint name="{name}_Knee">
+      <joint name="${name}_Knee">
         <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
       </joint>
-      <actuator name="{name}_Knee_motor">
+      <actuator name="${name}_Knee_motor">
         <mechanicalReduction>1</mechanicalReduction>
       </actuator>
     </transmission>

@@ -26,7 +26,6 @@
 
     <link name="${name}_HIP">
       <inertial>
-        <inertia ixx="0.00014538" ixy="8.1579E-07" ixz="-1.264E-05" iyy="0.00024024" iyz="1.3443E-06" izz="0.00013038"/>
         <origin xyz="${hip_com_x*front_hind} ${hip_com_y*mirror} ${hip_com_z}"/>
         <mass value="${hip_mass}"/>
         <inertia
@@ -59,7 +58,6 @@
             ixx="${thigh_ixx}" ixy="${thigh_ixy*mirror}" ixz="${thigh_ixz}"
             iyy="${thigh_iyy}" iyz="${thigh_iyz*mirror}"
             izz="${thigh_izz}"/>
-        <inertia ixx="0.001" ixy="-2.5E-06" ixz="-1.12E-04" iyy="0.00116" iyz="3.75E-07" izz="2.68E-04"/>
       </inertial>
       <visual>
         <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
@@ -91,9 +89,12 @@
 
     <link name="${name}_SHANK">
       <inertial>
-        <origin xyz="0.00585 -8.732E-07 -0.12"/>
-        <mass value="0.1567647392934227"></mass>
-        <inertia ixx="9.104550629239001e-04" ixy="-1.690647476476001e-08" ixz="9.41971624706656e-06" iyy="9.353157488964166e-04" iyz="7.70211998592336e-09" izz="4.30081045672405e-05"/>
+        <origin xyz="${shank_com_x} ${shank_com_y*mirror} ${shank_com_z}"/>
+        <mass value="${shank_mass}"/>
+        <inertia
+            ixx="${shank_ixx}" ixy="${shank_ixy*mirror}" ixz="${shank_ixz}"
+            iyy="${shank_iyy}" iyz="${shank_iyz*mirror}"
+            izz="${shank_izz}"/>
       </inertial>
       <visual>
         <origin rpy="3.14 -1.42 0" xyz="0.0 0.0 0.0"/>
@@ -130,32 +131,6 @@
       </collision>
     </link>
 
-    <gazebo reference="${name}_HIP">
-      <mu1>0.2</mu1>
-      <mu2>0.2</mu2>
-    </gazebo>
-
-    <gazebo reference="${name}_THIGH">
-      <mu1>0.2</mu1>
-      <mu2>0.2</mu2>
-      <self_collide>0</self_collide>
-      <kp value="1000000.0"/>
-      <kd value="100.0"/>
-    </gazebo>
-
-    <gazebo reference="${name}_SHANK">
-      <mu1>0.6</mu1>
-      <mu2>0.6</mu2>
-      <self_collide>1</self_collide>
-    </gazebo>
-
-    <gazebo reference="${name}_FOOT">
-      <mu1>0.6</mu1>
-      <mu2>0.6</mu2>
-      <self_collide>1</self_collide>
-      <kp value="1000000.0"/>
-      <kd value="100.0"/>
-    </gazebo>
 
     <xacro:leg_transmission name="${name}"/>
 
