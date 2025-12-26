@@ -35,7 +35,7 @@
   <xacro:property name="thigh_izz" value="2.68E-04"/>
 
   <!-- foot -->
-  <xacro:property name="foot_mass" value="0.08179029876178574"/>
+  <xacro:property name="foot_mass" value="0.01519029876178574"/>
   <xacro:property name="foot_radius" value="0.013"/>
 
   <!-- shank -->

@@ -72,3 +72,12 @@ ros2 launch lite3_description visualize.launch.py
   source ~/ros2_ws/install/setup.bash
   ros2 launch gz_quadruped_playground gazebo.launch.py pkg_description:=lite3_description controller:=ocs2 world:=warehouse
    ```
+
+### 四足机器人参数调整 
+* 参数调整一般在const.xacro中调整
+* 查看整体的urdf文件
+  ```bash
+  cd ~/ros2_ws
+  source ~/ros2_ws/install/setup.bash
+  ros2 run xacro xacro src/lite3_gazebo_classic/lite3_description/xacro/robot.xacro GAZEBO:=true CLASSIC:=true > src/lite3_gazebo_classic/lite3_description/urdf/robot.urdf
+  ```
