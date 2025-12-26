@@ -18,12 +18,10 @@ StateTrotting::StateTrotting(CtrlInterfaces &ctrl_interfaces,
                                                               wave_generator_(ctrl_component.wave_generator_),
                                                               gait_generator_(ctrl_component) {
     gait_height_ = 0.08;
-    Kpp = Vec3(70, 70, 70).asDiagonal();
+    Kpp = Vec3(50, 50, 50).asDiagonal(); 
     Kdp = Vec3(10, 10, 10).asDiagonal();
     kp_w_ = 780;
     Kd_w_ = Vec3(70, 70, 70).asDiagonal();
-    // kp_w_ = 400;
-    // Kd_w_ = Vec3(40, 40, 40).asDiagonal();
     Kp_swing_ = Vec3(400, 400, 400).asDiagonal();
     Kd_swing_ = Vec3(10, 10, 10).asDiagonal();
 
@@ -184,14 +182,14 @@ void StateTrotting::calcGain() const {
         if (wave_generator_->contact_(i) == 0) {
             // swing gain
             for (int j = 0; j < 3; j++) {
-                ctrl_interfaces_.joint_kp_command_interface_[i * 3 + j].get().set_value(3);
-                ctrl_interfaces_.joint_kd_command_interface_[i * 3 + j].get().set_value(2);
+                ctrl_interfaces_.joint_kp_command_interface_[i * 3 + j].get().set_value(30);
+                ctrl_interfaces_.joint_kd_command_interface_[i * 3 + j].get().set_value(2.5);
             }
         } else {
             // stable gain
             for (int j = 0; j < 3; j++) {
-                ctrl_interfaces_.joint_kp_command_interface_[i * 3 + j].get().set_value(0.8);
-                ctrl_interfaces_.joint_kd_command_interface_[i * 3 + j].get().set_value(0.8);
+                ctrl_interfaces_.joint_kp_command_interface_[i * 3 + j].get().set_value(3);
+                ctrl_interfaces_.joint_kd_command_interface_[i * 3 + j].get().set_value(1.5);
             }
         }
     }
