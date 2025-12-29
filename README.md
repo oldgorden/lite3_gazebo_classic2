@@ -11,8 +11,8 @@ Lite3 simulation on Gazebo Classic (ROS 2 Humble). Adapted from https://github.c
 
 ### 1. 创建工作空间
 ```bash
-mkdir -p ~/ros2_ws/src
-cd ~/ros2_ws/src
+mkdir -p ~/quadruped_ws/src
+cd ~/quadruped_ws/src
 ```
 
 ### 2. 克隆项目
@@ -24,7 +24,7 @@ git clone https://github.com/LaoGordon/lite3_gazebo_classic.git
 
 ### 推荐使用 rosdep 自动安装所有依赖：
 ```bash
-cd ~/ros2_ws
+cd ~/quadruped_ws
 sudo apt update
 
 # 安装项目依赖
@@ -47,13 +47,13 @@ sudo apt install ros-${ROS_DISTRO}-joint-state-publisher-gui
 
 ### 构建项目
 ```bash
-cd ~/ros2_ws
+cd ~/quadruped_ws
 colcon build --symlink-install
 ```
 
 ### 配置环境
 ```bash
-source ~/ros2_ws/install/setup.bash
+source ~/quadruped_ws/install/setup.bash
 ```
 
 ### 启动Gazebo Classic仿真
@@ -66,7 +66,7 @@ ros2 launch lite3_description gazebo_classic.launch.py
 ### 键盘控制 (Keyboard Control)
 打开新终端：
 ```bash
-cd ~/ros2_ws
+cd ~/quadruped_ws
 . install/setup.bash
 ros2 run keyboard_input keyboard_input
 ```
@@ -74,7 +74,7 @@ ros2 run keyboard_input keyboard_input
 参数调整一般在const.xacro中调整
 查看整体的urdf文件：
 ```bash
-cd ~/ros2_ws
-source ~/ros2_ws/install/setup.bash
+cd ~/quadruped_ws
+source ~/quadruped_ws/install/setup.bash
 ros2 run xacro xacro src/lite3_gazebo_classic/lite3_description/xacro/robot.xacro GAZEBO:=true CLASSIC:=true > src/lite3_gazebo_classic/lite3_description/urdf/robot.urdf
 ```

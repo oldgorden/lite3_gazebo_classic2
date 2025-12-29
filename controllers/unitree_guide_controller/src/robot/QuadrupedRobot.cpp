@@ -43,6 +43,10 @@ QuadrupedRobot::QuadrupedRobot(CtrlInterfaces &ctrl_interfaces, const std::strin
     
     this->mass_ = params.mass;
     this->pcb_  = params.pcb;
+
+    // this->pcb_ = Vec3::Zero(); 
+    // std::cout << "[INFO] Force pcb_ to Zero! Mass: " << this->mass_ << std::endl;
+
     this->Ib_   = params.Ib;
 
     // === [新增] 打印结果方便调试 (可选) ===

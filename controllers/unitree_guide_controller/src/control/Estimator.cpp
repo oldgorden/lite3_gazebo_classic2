@@ -201,7 +201,26 @@ void Estimator::update() {
     y_hat_ = C * x_hat_;
 
     // Update the measurement value
-    y_ << feet_pos_body_, feet_vel_body_, feet_h_;
+    // y_ << feet_pos_body_, feet_vel_body_, feet_h_;
+
+    // --- [修改后] 正确转换到世界坐标系 ---
+    Vec34 feet_pos_body_global;
+    Vec34 feet_vel_body_global;
+    
+    // 把机身系的足端位置和速度，旋转到世界系
+    for(int i = 0; i < 4; ++i){
+        feet_pos_body_global.col(i) = rotation_ * feet_pos_body_.segment(3 * i, 3);
+        feet_vel_body_global.col(i) = rotation_ * feet_vel_body_.segment(3 * i, 3);
+    }
+    
+    // 将旋转后的向量展平并填入测量向量 y_
+    Vec12 feet_pos_flat, feet_vel_flat;
+    for(int i = 0; i < 4; ++i){
+        feet_pos_flat.segment(3 * i, 3) = feet_pos_body_global.col(i);
+        feet_vel_flat.segment(3 * i, 3) = feet_vel_body_global.col(i);
+    }
+
+    y_ << feet_pos_flat, feet_vel_flat, feet_h_;
 
     // Update the covariance matrix
     Ppriori = A * P * A.transpose() + Q;
