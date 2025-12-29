@@ -27,7 +27,7 @@ StateTrotting::StateTrotting(CtrlInterfaces &ctrl_interfaces,
 
     v_x_limit_ << -0.4, 0.4;
     v_y_limit_ << -0.3, 0.3;
-    w_yaw_limit_ << -0.5, 0.5;
+    w_yaw_limit_ << -0.2, 0.2;
     dt_ = 1.0 / ctrl_interfaces_.frequency_;
 }
 
@@ -91,7 +91,6 @@ void StateTrotting::getUserCmd() {
 
     /* Turning */
     d_yaw_cmd_ = -invNormalize(ctrl_interfaces_.control_inputs_.rx, w_yaw_limit_(0), w_yaw_limit_(1));
-    d_yaw_cmd_ = 0.9 * d_yaw_cmd_past_ + (1 - 0.9) * d_yaw_cmd_;
     d_yaw_cmd_past_ = d_yaw_cmd_;
 }
 
@@ -199,7 +198,7 @@ bool StateTrotting::checkStepOrNot() {
     if (fabs(v_cmd_body_(0)) > 0.03 || fabs(v_cmd_body_(1)) > 0.03 ||
         fabs(pos_error_(0)) > 0.08 || fabs(pos_error_(1)) > 0.08 ||
         fabs(vel_error_(0)) > 0.05 || fabs(vel_error_(1)) > 0.05 ||
-        fabs(d_yaw_cmd_) > 0.20) {
+        fabs(d_yaw_cmd_) > 0.05) {
         return true;
     }
     return false;

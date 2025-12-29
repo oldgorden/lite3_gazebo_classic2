@@ -20,11 +20,18 @@ KeyboardInput::KeyboardInput() : Node("keyboard_input_node") {
 }
 
 void KeyboardInput::timer_callback() {
+    // 松手检测看门狗 (200ms 超时)
+    static int no_key_count = 0;
+    const int TIMEOUT_CYCLES = 2000;  // 200ms (100us per cycle)
+
     if (kbhit()) {
         char key = getchar();
         check_command(key);
-        if (inputs_.command == 0) check_value(key);
-        else {
+        if (inputs_.command == 0) {
+            check_value(key);
+            // 有运动按键，重置松手计数器
+            no_key_count = TIMEOUT_CYCLES;
+        } else {
             inputs_.lx = 0;
             inputs_.ly = 0;
             inputs_.rx = 0;
@@ -34,6 +41,21 @@ void KeyboardInput::timer_callback() {
         publisher_->publish(inputs_);
         just_published_ = true;
     } else {
+        // 松手检测核心逻辑
+        if (no_key_count > 0) {
+            no_key_count--;
+            if (no_key_count == 0) {
+                // 强制归零所有速度指令
+                inputs_.lx = 0;
+                inputs_.ly = 0;
+                inputs_.rx = 0;
+                inputs_.ry = 0;
+                publisher_->publish(inputs_);
+                RCLCPP_INFO(get_logger(), "Auto stop (key released).");
+            }
+        }
+
+        // 原有的 command 重置逻辑
         if (just_published_) {
             reset_count_ -= 1;
             if (reset_count_ == 0) {

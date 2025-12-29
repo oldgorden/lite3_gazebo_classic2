@@ -55,6 +55,9 @@ void BalanceCtrl::calMatrixA(const Vec34 &feet_pos_2_body, const RotMat &rotM) {
     for (int i = 0; i < 4; ++i) {
         A_.block(0, 3 * i, 3, 3) = I3;
         A_.block(3, 3 * i, 3, 3) = skew(Vec3(feet_pos_2_body.col(i)) - rotM * pcb_);
+
+        // // 方法1：先在机身系相减，再统一旋转到世界系 (推荐)
+        // A_.block(3, 3 * i, 3, 3) = skew(rotM * (Vec3(feet_pos_2_body.col(i)) - pcb_));
     }
 }
 
