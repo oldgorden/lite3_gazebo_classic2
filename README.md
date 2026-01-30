@@ -63,6 +63,26 @@ ros2 topic list | grep -E "mid360|camera"
 # 应看到：/mid360/points, /camera/depth/image_rect_raw, /camera/color/image_raw等话题
 ```
 
+### 自动化安装脚本
+
+为了方便用户安装传感器依赖，我们提供了一个一键安装脚本 `install_sensor_deps.sh`。该脚本会自动克隆所需的插件并进行编译。
+
+#### 使用方法：
+```bash
+# 进入项目目录
+cd ~/quadruped_ws/src/lite3_gazebo_classic
+
+# 运行安装脚本
+./install_sensor_deps.sh
+```
+
+#### 脚本功能：
+- 自动检测工作空间目录
+- 克隆Livox激光雷达仿真插件（如果不存在）
+- 克隆Realsense D435i相机插件（如果不存在）
+- 使用colcon编译所有包
+- 提供环境配置和使用说明
+
 ### 验证方法
 
 #### 检查点云数据
@@ -138,3 +158,4 @@ ros2 run xacro xacro src/lite3_gazebo_classic/lite3_description/xacro/robot.xacr
 - **2026-01-30**: 集成Livox Mid-360雷达和Realsense D435i相机
 - **2026-01-30**: 添加静态TF变换解决RViz队列溢出问题
 - **2026-01-30**: 提供详细集成文档和配置指南
+- **2026-01-30**: 添加自动化安装脚本 `install_sensor_deps.sh`

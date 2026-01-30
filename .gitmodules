@@ -1,0 +1,15 @@
+# 传感器依赖子模块配置
+# 注意：由于网络限制，子模块暂未添加
+# 如需添加子模块，请执行以下命令：
+#
+# 添加Livox激光雷达仿真插件：
+# git submodule add https://github.com/LihanChen2004/livox_laser_simulation_ros2.git external/livox_laser_simulation_ros2
+#
+# 添加Realsense D435i相机插件：
+# git submodule add https://github.com/pal-robotics/realsense_gazebo_plugin.git external/realsense_gazebo_plugin
+#
+# 初始化子模块：
+# git submodule update --init --recursive
+#
+# 替代方案：使用安装脚本 install_sensor_deps.sh 手动安装
+
