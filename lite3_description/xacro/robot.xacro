@@ -87,4 +87,8 @@
   <xacro:leg name="HR" mirror="-1" mirror_dae="False" front_hind="-1" front_hind_dae="False"/>
   <xacro:leg name="HL" mirror="1" mirror_dae="True" front_hind="-1" front_hind_dae="False"/>
 
+  <!-- 加载传感器 -->
+  <xacro:include filename="$(find lite3_description)/xacro/sensors/load_sensors.xacro"/>
+  <xacro:load_all_sensors parent="TORSO"/>
+
 </robot>

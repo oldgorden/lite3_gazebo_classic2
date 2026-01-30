@@ -1,0 +1,107 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:property name="M_PI" value="3.1415926535897931"/>
+
+  <xacro:macro name="d435i_sensor" params="name:=d435i parent:=base_link
+                                          xyz:='0 0 0' rpy:='0 0 0'
+                                          topic_ns:=camera visualize:=false">
+    
+    <!-- 实体 Link -->
+    <link name="${name}_link">
+      <inertial>
+        <mass value="0.072"/>
+        <inertia ixx="0.000015" ixy="0" ixz="0" iyy="0.000004" iyz="0" izz="0.000015"/>
+      </inertial>
+      <visual>
+        <geometry><box size="0.025 0.090 0.025"/></geometry>
+        <material name="${name}_material"><color rgba="0.1 0.1 0.1 1.0"/></material>
+      </visual>
+      <collision>
+        <geometry><box size="0.025 0.090 0.025"/></geometry>
+      </collision>
+    </link>
+
+    <!-- 光学 Frames -->
+    <link name="${name}_color_optical_frame"/>
+    <link name="${name}_depth_optical_frame"/>
+    <link name="${name}_infra1_optical_frame"/>
+    <link name="${name}_infra2_optical_frame"/>
+
+    <joint name="${name}_joint" type="fixed">
+      <parent link="${parent}"/>
+      <child link="${name}_link"/>
+      <origin xyz="${xyz}" rpy="${rpy}"/>
+    </joint>
+
+    <joint name="${name}_depth_optical_joint" type="fixed">
+      <parent link="${name}_link"/>
+      <child link="${name}_depth_optical_frame"/>
+      <origin xyz="0.005 0 0" rpy="${-M_PI/2} 0 ${-M_PI/2}"/>
+    </joint>
+
+    <joint name="${name}_color_optical_joint" type="fixed">
+      <parent link="${name}_link"/>
+      <child link="${name}_color_optical_frame"/>
+      <origin xyz="0.005 0.0175 0" rpy="${-M_PI/2} 0 ${-M_PI/2}"/>
+    </joint>
+
+    <joint name="${name}_infra1_optical_joint" type="fixed">
+      <parent link="${name}_link"/>
+      <child link="${name}_infra1_optical_frame"/>
+      <origin xyz="0.005 -0.0175 0" rpy="${-M_PI/2} 0 ${-M_PI/2}"/>
+    </joint>
+
+    <joint name="${name}_infra2_optical_joint" type="fixed">
+      <parent link="${name}_link"/>
+      <child link="${name}_infra2_optical_frame"/>
+      <origin xyz="0.005 -0.055 0" rpy="${-M_PI/2} 0 ${-M_PI/2}"/>
+    </joint>
+
+    <!-- Gazebo 插件 -->
+    <gazebo reference="${name}_link">
+      <sensor type="depth" name="${name}_depth">
+        <camera>
+          <horizontal_fov>1.211</horizontal_fov>
+          <image><width>1280</width><height>720</height></image>
+          <clip><near>0.1</near><far>10.0</far></clip>
+        </camera>
+        <always_on>1</always_on>
+        <update_rate>30</update_rate>
+        <visualize>${visualize}</visualize>
+      </sensor>
+      
+      <sensor type="camera" name="${name}_color">
+        <camera>
+          <horizontal_fov>1.211</horizontal_fov>
+          <image><width>1280</width><height>720</height><format>R8G8B8</format></image>
+          <clip><near>0.1</near><far>10.0</far></clip>
+        </camera>
+        <always_on>1</always_on>
+        <update_rate>30</update_rate>
+        <visualize>${visualize}</visualize>
+      </sensor>
+
+      <!-- 使用标准 ROS 插件代替 realsense_gazebo_plugin -->
+      <plugin name="${name}_depth_plugin" filename="libgazebo_ros_depth_camera.so">
+        <ros>
+          <namespace>/${topic_ns}</namespace>
+          <remapping>image_raw:=depth/image_rect_raw</remapping>
+          <remapping>camera_info:=depth/camera_info</remapping>
+          <remapping>points:=depth/color/points</remapping>
+        </ros>
+        <camera_name>depth</camera_name>
+        <frame_name>${name}_depth_optical_frame</frame_name>
+      </plugin>
+
+      <plugin name="${name}_color_plugin" filename="libgazebo_ros_camera.so">
+        <ros>
+          <namespace>/${topic_ns}</namespace>
+          <remapping>image_raw:=color/image_raw</remapping>
+          <remapping>camera_info:=color/camera_info</remapping>
+        </ros>
+        <camera_name>color</camera_name>
+        <frame_name>${name}_color_optical_frame</frame_name>
+      </plugin>
+    </gazebo>
+  </xacro:macro>
+</robot>

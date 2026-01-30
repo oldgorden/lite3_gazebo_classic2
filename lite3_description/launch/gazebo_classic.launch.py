@@ -84,15 +84,28 @@ def launch_setup(context, *args, **kwargs):
         arguments=["unitree_guide_controller", "--controller-manager", "/controller_manager"],
     )
 
+    # 添加静态TF变换，将mid360_livox_laser与mid360_link关联
+    static_tf_mid360 = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        arguments=['0', '0', '0', '0', '0', '0', 'mid360_link', 'mid360_livox_laser'],
+        output='screen',
+    )
+
     return [
         #设置环境变量
         SetEnvironmentVariable(name='QT_QPA_PLATFORM', value='xcb'),
         SetEnvironmentVariable(name='GTK_IM_MODULE', value=''),
         SetEnvironmentVariable(name='QT_IM_MODULE', value=''),
         SetEnvironmentVariable(name='XMODIFIERS', value=''),
+        # 添加Gazebo插件路径，确保Livox插件能被找到
+        SetEnvironmentVariable(name='GAZEBO_PLUGIN_PATH',
+            value='/home/longkang/quadruped_ws/install/ros2_livox_simulation/lib:' + 
+                  (os.environ['GAZEBO_PLUGIN_PATH'] if 'GAZEBO_PLUGIN_PATH' in os.environ else '')),
 
         rviz,
         robot_state_publisher,
+        static_tf_mid360,
         gazebo,
         spawn_entity,
         leg_pd_controller,

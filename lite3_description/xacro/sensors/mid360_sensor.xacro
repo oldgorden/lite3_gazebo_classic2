@@ -1,0 +1,106 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:property name="M_PI" value="3.1415926535897931"/>
+  
+  <xacro:macro name="mid360_sensor" params="name:=mid360 parent:=base_link 
+                                           xyz:='0 0 0' rpy:='0 0 0'
+                                           visualize:=false">
+    
+    <!-- 雷达底座 Link（带可视化模型） -->
+    <link name="${name}_base_link">
+      <inertial>
+        <mass value="0.265"/>
+        <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <!-- 使用圆柱体近似，如果有 mesh 文件可替换 -->
+          <cylinder radius="0.038" length="0.065"/>
+        </geometry>
+        <material name="mid360_material">
+          <color rgba="0.1 0.15 0.2 1.0"/>
+        </material>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <cylinder radius="0.038" length="0.065"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <!-- 光学中心 Link（插件使用这个 frame 发布点云） -->
+    <link name="${name}_link">
+      <inertial>
+        <mass value="0.001"/>
+        <inertia ixx="0.000001" ixy="0" ixz="0" iyy="0.000001" iyz="0" izz="0.000001"/>
+      </inertial>
+    </link>
+
+    <!-- 关键：底座到光学中心的偏移（Livox 官方数据） -->
+    <joint name="${name}_base_joint" type="fixed">
+      <parent link="${name}_base_link"/>
+      <child link="${name}_link"/>
+      <origin xyz="-0.012 0.0 0.047" rpy="0 0 0"/>
+    </joint>
+
+    <!-- 安装到机器人 -->
+    <joint name="${name}_mount_joint" type="fixed">
+      <parent link="${parent}"/>
+      <child link="${name}_base_link"/>
+      <origin xyz="${xyz}" rpy="${rpy}"/>
+    </joint>
+
+    <!-- Livox ROS2 非重复扫描插件（真实数据） -->
+    <gazebo reference="${name}_link">
+      <sensor type="ray" name="${name}_livox_laser">
+        <pose>0 0 0 0 0 0</pose>
+        <visualize>${visualize}</visualize>
+        <update_rate>10</update_rate>
+        
+        <!-- 使用 livox_laser_simulation_ros2 插件 -->
+        <plugin name="${name}_livox_plugin" filename="libros2_livox.so">
+          <ray>
+            <scan>
+              <horizontal>
+                <samples>100</samples>
+                <resolution>1</resolution>
+                <min_angle>0</min_angle>
+                <max_angle>${2*M_PI}</max_angle>
+              </horizontal>
+              <vertical>
+                <samples>360</samples>
+                <resolution>1</resolution>
+                <min_angle>${-7.22/180*M_PI}</min_angle>
+                <max_angle>${55.22/180*M_PI}</max_angle>
+              </vertical>
+            </scan>
+            <range>
+              <min>0.1</min>
+              <max>100.0</max>
+              <resolution>0.002</resolution>
+            </range>
+            <noise>
+              <type>gaussian</type>
+              <mean>0.0</mean>
+              <stddev>0.01</stddev>
+            </noise>
+          </ray>
+          
+          <!-- Livox 非重复扫描参数 -->
+          <visualize>${visualize}</visualize>
+          <samples>12000</samples>
+          <downsample>2</downsample>
+          
+          <!-- 扫描模式文件路径（必须在包内存在） -->
+          <csv_file_name>/home/longkang/quadruped_ws/build/ros2_livox_simulation/scan_mode/mid360.csv</csv_file_name>
+          
+          <!-- ROS2 话题配置 -->
+          <topic>/mid360/points</topic>
+          <frame_id>${name}_link</frame_id>
+        </plugin>
+      </sensor>
+    </gazebo>
+  </xacro:macro>
+</robot>
