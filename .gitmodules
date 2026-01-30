@@ -3,13 +3,27 @@
 # 如需添加子模块，请执行以下命令：
 #
 # 添加Livox激光雷达仿真插件：
-# git submodule add https://github.com/LihanChen2004/livox_laser_simulation_ros2.git external/livox_laser_simulation_ros2
+# git submodule add https://github.com/LihanChen2004/livox_laser_simulation_ros2.git src/livox_laser_simulation_ros2
 #
 # 添加Realsense D435i相机插件：
-# git submodule add https://github.com/pal-robotics/realsense_gazebo_plugin.git external/realsense_gazebo_plugin
+# git submodule add https://github.com/pal-robotics/realsense_gazebo_plugin.git src/realsense_gazebo_plugin
+#
+# 添加Livox ROS2驱动程序：
+# git submodule add https://github.com/Livox-SDK/livox_ros_driver2.git src/livox_ros_driver2
 #
 # 初始化子模块：
 # git submodule update --init --recursive
 #
 # 替代方案：使用安装脚本 install_sensor_deps.sh 手动安装
 
+[submodule "src/livox_laser_simulation_ros2"]
+	path = src/livox_laser_simulation_ros2
+	url = https://github.com/LihanChen2004/livox_laser_simulation_ros2.git
+
+[submodule "src/realsense_gazebo_plugin"]
+	path = src/realsense_gazebo_plugin
+	url = https://github.com/pal-robotics/realsense_gazebo_plugin.git
+
+[submodule "src/livox_ros_driver2"]
+	path = src/livox_ros_driver2
+	url = https://github.com/Livox-SDK/livox_ros_driver2.git

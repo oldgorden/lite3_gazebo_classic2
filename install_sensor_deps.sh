@@ -38,8 +38,18 @@ else
     echo "  ✓ 已存在，跳过"
 fi
 
-# 3. 编译所有包
-echo "3. 编译所有包..."
+# 3. 安装Livox ROS2驱动程序
+echo "3. 安装Livox ROS2驱动程序..."
+if [ ! -d "livox_ros_driver2" ]; then
+    echo "  克隆 livox_ros_driver2..."
+    git clone https://github.com/Livox-SDK/livox_ros_driver2.git
+    echo "  ✓ 已克隆"
+else
+    echo "  ✓ 已存在，跳过"
+fi
+
+# 4. 编译所有包
+echo "4. 编译所有包..."
 cd "$WORKSPACE"
 if command -v colcon &> /dev/null; then
     echo "  运行 colcon build..."
