@@ -14,7 +14,7 @@
 
 ```bash
 # 在ROS2工作空间的src目录中执行
-cd /home/lk/ws/quadruped_ws/src
+cd your_ros2_workspace/src
 git clone https://github.com/LaoGordon/lite3_gazebo_classic.git
 ```
 
@@ -22,7 +22,7 @@ git clone https://github.com/LaoGordon/lite3_gazebo_classic.git
 
 ```bash
 # 进入仓库目录
-cd /home/lk/ws/quadruped_ws/src/lite3_gazebo_classic
+cd your_ros2_workspace/src/lite3_gazebo_classic
 
 # 初始化并更新所有子模块
 git submodule update --init --recursive
@@ -41,7 +41,7 @@ sudo apt update
 sudo apt install liblivox-sdk2-dev libgoogle-glog-dev
 
 # 安装ROS2依赖
-cd /home/lk/ws/quadruped_ws
+cd your_ros2_workspace
 rosdep install --from-paths src --ignore-src -r -y
 ```
 
@@ -60,7 +60,7 @@ colcon build --packages-select lite3_description --symlink-install
 ```bash
 # 在每次运行前都需要设置
 source /usr/share/gazebo/setup.sh
-export GAZEBO_PLUGIN_PATH=/home/lk/ws/quadruped_ws/install/ros2_livox_simulation/lib:$GAZEBO_PLUGIN_PATH
+export GAZEBO_PLUGIN_PATH=$(pwd)/install/ros2_livox_simulation/lib:$GAZEBO_PLUGIN_PATH
 source install/setup.bash
 ```
 
@@ -70,7 +70,7 @@ source install/setup.bash
 
 ```bash
 source /usr/share/gazebo/setup.sh
-export GAZEBO_PLUGIN_PATH=/home/lk/ws/quadruped_ws/install/ros2_livox_simulation/lib:$GAZEBO_PLUGIN_PATH
+export GAZEBO_PLUGIN_PATH=$(pwd)/install/ros2_livox_simulation/lib:$GAZEBO_PLUGIN_PATH
 source install/setup.bash
 ros2 launch lite3_description gazebo_classic.launch.py
 ```
@@ -85,7 +85,7 @@ ros2 launch lite3_description gazebo_classic.launch.py
 
 ```bash
 source /usr/share/gazebo/setup.sh
-export GAZEBO_PLUGIN_PATH=/home/lk/ws/quadruped_ws/install/ros2_livox_simulation/lib:$GAZEBO_PLUGIN_PATH
+export GAZEBO_PLUGIN_PATH=$(pwd)/install/ros2_livox_simulation/lib:$GAZEBO_PLUGIN_PATH
 source install/setup.bash
 ros2 launch lite3_description gazebo_server_only.launch.py
 ```
@@ -122,11 +122,11 @@ Livox点云数据未发布，RVIZ中看不到点云
 **解决方案**：
 1. 确保正确设置了Gazebo插件路径：
    ```bash
-   export GAZEBO_PLUGIN_PATH=/home/lk/ws/quadruped_ws/install/ros2_livox_simulation/lib:$GAZEBO_PLUGIN_PATH
+   export GAZEBO_PLUGIN_PATH=$(pwd)/install/ros2_livox_simulation/lib:$GAZEBO_PLUGIN_PATH
    ```
 2. 验证插件文件存在：
    ```bash
-   ls /home/lk/ws/quadruped_ws/install/ros2_livox_simulation/lib/libros2_livox.so
+   ls $(pwd)/install/ros2_livox_simulation/lib/libros2_livox.so
    ```
 
 ### 4. Gazebo进程管理

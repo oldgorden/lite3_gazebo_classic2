@@ -14,7 +14,7 @@ This repository supports complete Lite3 quadruped robot simulation, including:
 
 ```bash
 # Execute in the src directory of your ROS2 workspace
-cd /home/lk/ws/quadruped_ws/src
+cd your_ros2_workspace/src
 git clone https://github.com/LaoGordon/lite3_gazebo_classic.git
 ```
 
@@ -22,7 +22,7 @@ git clone https://github.com/LaoGordon/lite3_gazebo_classic.git
 
 ```bash
 # Enter the repository directory
-cd /home/lk/ws/quadruped_ws/src/lite3_gazebo_classic
+cd your_ros2_workspace/src/lite3_gazebo_classic
 
 # Initialize and update all submodules
 git submodule update --init --recursive
@@ -41,7 +41,7 @@ sudo apt update
 sudo apt install liblivox-sdk2-dev libgoogle-glog-dev
 
 # Install ROS2 dependencies
-cd /home/lk/ws/quadruped_ws
+cd your_ros2_workspace
 rosdep install --from-paths src --ignore-src -r -y
 ```
 
@@ -60,7 +60,7 @@ colcon build --packages-select lite3_description --symlink-install
 ```bash
 # Must be set before each run
 source /usr/share/gazebo/setup.sh
-export GAZEBO_PLUGIN_PATH=/home/lk/ws/quadruped_ws/install/ros2_livox_simulation/lib:$GAZEBO_PLUGIN_PATH
+export GAZEBO_PLUGIN_PATH=$(pwd)/install/ros2_livox_simulation/lib:$GAZEBO_PLUGIN_PATH
 source install/setup.bash
 ```
 
@@ -70,7 +70,7 @@ source install/setup.bash
 
 ```bash
 source /usr/share/gazebo/setup.sh
-export GAZEBO_PLUGIN_PATH=/home/lk/ws/quadruped_ws/install/ros2_livox_simulation/lib:$GAZEBO_PLUGIN_PATH
+export GAZEBO_PLUGIN_PATH=$(pwd)/install/ros2_livox_simulation/lib:$GAZEBO_PLUGIN_PATH
 source install/setup.bash
 ros2 launch lite3_description gazebo_classic.launch.py
 ```
@@ -85,7 +85,7 @@ This will start:
 
 ```bash
 source /usr/share/gazebo/setup.sh
-export GAZEBO_PLUGIN_PATH=/home/lk/ws/quadruped_ws/install/ros2_livox_simulation/lib:$GAZEBO_PLUGIN_PATH
+export GAZEBO_PLUGIN_PATH=$(pwd)/install/ros2_livox_simulation/lib:$GAZEBO_PLUGIN_PATH
 source install/setup.bash
 ros2 launch lite3_description gazebo_server_only.launch.py
 ```
@@ -122,11 +122,11 @@ Livox point cloud data not published, no point cloud visible in RVIZ
 **Solution**:
 1. Ensure Gazebo plugin path is correctly set:
    ```bash
-   export GAZEBO_PLUGIN_PATH=/home/lk/ws/quadruped_ws/install/ros2_livox_simulation/lib:$GAZEBO_PLUGIN_PATH
+   export GAZEBO_PLUGIN_PATH=$(pwd)/install/ros2_livox_simulation/lib:$GAZEBO_PLUGIN_PATH
    ```
 2. Verify plugin file exists:
    ```bash
-   ls /home/lk/ws/quadruped_ws/install/ros2_livox_simulation/lib/libros2_livox.so
+   ls $(pwd)/install/ros2_livox_simulation/lib/libros2_livox.so
    ```
 
 ### 4. Gazebo Process Management
