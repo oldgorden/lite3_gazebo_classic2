@@ -84,6 +84,14 @@ def launch_setup(context, *args, **kwargs):
         arguments=["unitree_guide_controller", "--controller-manager", "/controller_manager"],
     )
 
+    # 添加静态TF变换以解决Livox插件frame_id问题
+    livox_tf_static = Node(
+        package="tf2_ros",
+        executable="static_transform_publisher",
+        arguments=["0", "0", "0", "0", "0", "0", "mid360_link", "mid360_livox_laser"],
+        output="screen",
+    )
+
     return [
         #设置环境变量
         SetEnvironmentVariable(name='QT_QPA_PLATFORM', value='xcb'),
@@ -99,6 +107,7 @@ def launch_setup(context, *args, **kwargs):
         gazebo,
         spawn_entity,
         leg_pd_controller,
+        livox_tf_static,
         RegisterEventHandler(
             event_handler=OnProcessExit(
                 target_action=leg_pd_controller,
