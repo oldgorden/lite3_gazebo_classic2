@@ -1,3 +1,9 @@
 [submodule "src/livox_ros_driver2"]
 	path = src/livox_ros_driver2
 	url = https://github.com/oldgorden/livox_ros_driver2.git
+[submodule "src/realsense_gazebo_plugin"]
+	path = src/realsense_gazebo_plugin
+	url = https://github.com/oldgorden/realsense_gazebo_plugin.git
+[submodule "src/livox_laser_simulation_ros2"]
+	path = src/livox_laser_simulation_ros2
+	url = https://github.com/oldgorden/livox_laser_simulation_ros2.git
