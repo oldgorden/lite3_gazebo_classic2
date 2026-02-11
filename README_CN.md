@@ -18,29 +18,14 @@ cd your_ros2_workspace/src
 git clone https://github.com/oldgorden/lite3_gazebo_classic2.git
 ```
 
-### 2. 初始化子模块（推荐方式）
-
-```bash
-# 进入仓库目录
-cd your_ros2_workspace/src/lite3_gazebo_classic
-
-# 初始化并更新所有子模块
-git submodule update --init --recursive
-
-# 如果子模块克隆失败，可以手动添加（可选）
-# git submodule add https://github.com/LihanChen2004/livox_laser_simulation_ros2.git src/livox_laser_simulation_ros2
-# git submodule add https://github.com/pal-robotics/realsense_gazebo_plugin.git src/realsense_gazebo_plugin  
-# git submodule add https://github.com/Livox-SDK/livox_ros_driver2.git src/livox_ros_driver2
-```
-
-### 3. 安装依赖
+### 2. 安装依赖
 
 ```bash
 # 安装系统依赖
 sudo apt update
 sudo apt install liblivox-sdk2-dev libgoogle-glog-dev
 
-# 安装ROS2依赖
+# 安装ROS2依赖（仓库已包含所有必要的依赖包）
 cd your_ros2_workspace
 rosdep install --from-paths src --ignore-src -r -y
 ```

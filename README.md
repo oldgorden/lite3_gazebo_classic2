@@ -18,29 +18,14 @@ cd your_ros2_workspace/src
 git clone https://github.com/oldgorden/lite3_gazebo_classic2.git
 ```
 
-### 2. Initialize Submodules (Recommended)
-
-```bash
-# Enter the repository directory
-cd your_ros2_workspace/src/lite3_gazebo_classic
-
-# Initialize and update all submodules
-git submodule update --init --recursive
-
-# If submodule cloning fails, you can add manually (optional)
-# git submodule add https://github.com/LihanChen2004/livox_laser_simulation_ros2.git src/livox_laser_simulation_ros2
-# git submodule add https://github.com/pal-robotics/realsense_gazebo_plugin.git src/realsense_gazebo_plugin  
-# git submodule add https://github.com/Livox-SDK/livox_ros_driver2.git src/livox_ros_driver2
-```
-
-### 3. Install Dependencies
+### 2. Install Dependencies
 
 ```bash
 # Install system dependencies
 sudo apt update
 sudo apt install liblivox-sdk2-dev libgoogle-glog-dev
 
-# Install ROS2 dependencies
+# Install ROS2 dependencies (all necessary dependency packages are included in the repository)
 cd your_ros2_workspace
 rosdep install --from-paths src --ignore-src -r -y
 ```
