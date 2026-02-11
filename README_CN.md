@@ -15,7 +15,7 @@
 ```bash
 # 在ROS2工作空间的src目录中执行
 cd your_ros2_workspace/src
-git clone https://github.com/LaoGordon/lite3_gazebo_classic.git
+git clone https://github.com/oldgorden/lite3_gazebo_classic2.git
 ```
 
 ### 2. 初始化子模块（推荐方式）

@@ -15,7 +15,7 @@ This repository supports complete Lite3 quadruped robot simulation, including:
 ```bash
 # Execute in the src directory of your ROS2 workspace
 cd your_ros2_workspace/src
-git clone https://github.com/LaoGordon/lite3_gazebo_classic.git
+git clone https://github.com/oldgorden/lite3_gazebo_classic2.git
 ```
 
 ### 2. Initialize Submodules (Recommended)
