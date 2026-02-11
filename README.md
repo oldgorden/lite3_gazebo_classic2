@@ -1,161 +1,204 @@
-Lite3 simulation on Gazebo Classic (ROS 2 Humble). Adapted from https://github.com/legubiao/quadruped_ros2_control/.
+# Lite3 Gazebo Classic Usage Guide
 
-## 系统要求 (System Requirements)
+## Features
 
-### 环境依赖
-- **Ubuntu 22.04** 
-- **ROS 2 Humble** 
-- **Gazebo Classic 11**
+This repository supports complete Lite3 quadruped robot simulation, including:
+- **Livox MID360 LiDAR**: Non-repetitive scanning mode with realistic point cloud data simulation
+- **Realsense D435i Depth Camera**: RGB-D data
+- **IMU Sensor**: Inertial Measurement Unit
+- **Complete Controllers**: PD controller, Unitree Guide Controller, etc.
 
-## 工作空间设置 (Workspace Setup)
+## Installation Steps
 
-### 1. 创建工作空间
+### 1. Clone Repository
+
 ```bash
-mkdir -p ~/quadruped_ws/src
-cd ~/quadruped_ws/src
-```
-
-### 2. 克隆项目
-```bash
+# Execute in the src directory of your ROS2 workspace
+cd /home/lk/ws/quadruped_ws/src
 git clone https://github.com/LaoGordon/lite3_gazebo_classic.git
-cd lite3_gazebo_classic
 ```
 
-### 3. 初始化子模块（传感器依赖）
+### 2. Initialize Submodules (Recommended)
+
 ```bash
-# 初始化并更新子模块
+# Enter the repository directory
+cd /home/lk/ws/quadruped_ws/src/lite3_gazebo_classic
+
+# Initialize and update all submodules
 git submodule update --init --recursive
+
+# If submodule cloning fails, you can add manually (optional)
+# git submodule add https://github.com/LihanChen2004/livox_laser_simulation_ros2.git src/livox_laser_simulation_ros2
+# git submodule add https://github.com/pal-robotics/realsense_gazebo_plugin.git src/realsense_gazebo_plugin  
+# git submodule add https://github.com/Livox-SDK/livox_ros_driver2.git src/livox_ros_driver2
 ```
 
-如果子模块未预先配置，请手动安装依赖：
+### 3. Install Dependencies
 
-## 传感器依赖安装（Livox Mid-360雷达 + Realsense D435i相机）
-
-本仓库已集成Livox Mid-360激光雷达和Intel Realsense D435i相机，可提供真实的非重复扫描点云和深度图像。
-
-### 手动安装依赖（如果未使用子模块）
-
-#### 1. 克隆必需的插件
 ```bash
-cd ~/quadruped_ws/src
+# Install system dependencies
+sudo apt update
+sudo apt install liblivox-sdk2-dev libgoogle-glog-dev
 
-# Livox激光雷达仿真插件（ROS2版本）
-git clone https://github.com/LihanChen2004/livox_laser_simulation_ros2.git
-
-# Realsense D435i相机插件
-git clone https://github.com/pal-robotics/realsense_gazebo_plugin.git
+# Install ROS2 dependencies
+cd /home/lk/ws/quadruped_ws
+rosdep install --from-paths src --ignore-src -r -y
 ```
 
-#### 2. 编译所有包
+### 4. Build Workspace
+
 ```bash
-cd ~/quadruped_ws
+# Build all packages (including Livox-related dependencies)
 colcon build --symlink-install
+
+# Or build only the lite3_description package
+colcon build --packages-select lite3_description --symlink-install
+```
+
+### 4. Set Environment Variables
+
+```bash
+# Must be set before each run
+source /usr/share/gazebo/setup.sh
+export GAZEBO_PLUGIN_PATH=/home/lk/ws/quadruped_ws/install/ros2_livox_simulation/lib:$GAZEBO_PLUGIN_PATH
 source install/setup.bash
 ```
 
-#### 3. 启动仿真验证
+## Run Simulation
+
+### Full Simulation with GUI
+
 ```bash
-# 启动Gazebo仿真
-ros2 launch lite3_description gazebo_classic.launch.py
-
-# 在新终端检查话题
-ros2 topic list | grep -E "mid360|camera"
-# 应看到：/mid360/points, /camera/depth/image_rect_raw, /camera/color/image_raw等话题
-```
-
-### 自动化安装脚本
-
-为了方便用户安装传感器依赖，我们提供了一个一键安装脚本 `install_sensor_deps.sh`。该脚本会自动克隆所需的插件并进行编译。
-
-#### 使用方法：
-```bash
-# 进入项目目录
-cd ~/quadruped_ws/src/lite3_gazebo_classic
-
-# 运行安装脚本
-./install_sensor_deps.sh
-```
-
-#### 脚本功能：
-- 自动检测工作空间目录
-- 克隆Livox激光雷达仿真插件（如果不存在）
-- 克隆Realsense D435i相机插件（如果不存在）
-- 使用colcon编译所有包
-- 提供环境配置和使用说明
-
-### 验证方法
-
-#### 检查点云数据
-```bash
-# 检查点云话题
-ros2 topic echo /mid360/points_PointCloud2 --field width --no-arr | head -1
-# 应显示点云数量（如：3000）
-
-# 检查数据频率
-ros2 topic hz /mid360/points_PointCloud2 --window 10
-# 应显示约2-10Hz的数据流
-```
-
-#### 检查TF变换
-```bash
-# 验证静态TF变换
-ros2 run tf2_ros tf2_echo mid360_link mid360_livox_laser
-# 应显示零变换
-```
-
-### 详细文档
-完整集成指南和问题解决方案：[docs/gazebo_livox_integration.md](docs/gazebo_livox_integration.md)
-
-### 应用场景配置建议
-
-| 应用场景 | samples | downsample | update_rate | 说明 |
-|----------|---------|------------|-------------|------|
-| 实时SLAM | 6000 | 4 | 10Hz | 高密度、高频率，适合建图 |
-| 导航避障 | 3000 | 8 | 5Hz | 中等密度，平衡性能与精度 |
-| 演示展示 | 12000 | 2 | 5Hz | 最高密度，视觉效果最佳 |
-| 性能测试 | 1500 | 16 | 2Hz | 最低负载，性能基准测试 |
-
-**注意**：更高密度和频率会增加CPU/GPU负载，请根据系统性能调整参数。
-
-## 编译运行 (Build and Run)
-
-### 构建项目
-```bash
-cd ~/quadruped_ws
-colcon build --symlink-install
-```
-
-### 配置环境
-```bash
-source ~/quadruped_ws/install/setup.bash
-```
-
-### 启动Gazebo Classic仿真
-```bash
+source /usr/share/gazebo/setup.sh
+export GAZEBO_PLUGIN_PATH=/home/lk/ws/quadruped_ws/install/ros2_livox_simulation/lib:$GAZEBO_PLUGIN_PATH
+source install/setup.bash
 ros2 launch lite3_description gazebo_classic.launch.py
 ```
 
-## 控制机器人 (Robot Control)
+This will start:
+- Gazebo simulation environment (with GUI)
+- RViz visualization tool
+- All necessary controllers
+- Livox MID360 LiDAR point cloud published to `/mid360/points` topic
 
-### 键盘控制 (Keyboard Control)
-打开新终端：
+### Server-only Mode (No GUI)
+
 ```bash
-cd ~/quadruped_ws
-. install/setup.bash
-ros2 run keyboard_input keyboard_input
-```
-## 四足机器人参数调整 
-参数调整一般在const.xacro中调整
-查看整体的urdf文件：
-```bash
-cd ~/quadruped_ws
-source ~/quadruped_ws/install/setup.bash
-ros2 run xacro xacro src/lite3_gazebo_classic/lite3_description/xacro/robot.xacro GAZEBO:=true CLASSIC:=true > src/lite3_gazebo_classic/lite3_description/urdf/robot.urdf
+source /usr/share/gazebo/setup.sh
+export GAZEBO_PLUGIN_PATH=/home/lk/ws/quadruped_ws/install/ros2_livox_simulation/lib:$GAZEBO_PLUGIN_PATH
+source install/setup.bash
+ros2 launch lite3_description gazebo_server_only.launch.py
 ```
 
-## 更新日志
+## Common Issues and Solutions
 
-- **2026-01-30**: 集成Livox Mid-360雷达和Realsense D435i相机
-- **2026-01-30**: 添加静态TF变换解决RViz队列溢出问题
-- **2026-01-30**: 提供详细集成文档和配置指南
-- **2026-01-30**: 添加自动化安装脚本 `install_sensor_deps.sh`
+### 1. Gazebo Server Crash (exit code -11)
+
+**Symptom**:
+```
+[ERROR] [gzserver-3]: process has died [pid XXX, exit code -11, cmd 'gzserver ...']
+```
+
+**Cause**: Livox plugin incompatible with Gazebo sensor noise configuration
+
+**Solution**: Fixed by modifying sensor configuration file. Ensure you're using the latest version where `src/lite3_gazebo_classic/lite3_description/xacro/sensors/mid360_sensor.xacro` has the noise configuration removed.
+
+### 2. "[Err] [Sensor.cc:510] Get noise index not valid" Error
+
+**Symptom**:
+```
+[gzserver-3] [Err] [Sensor.cc:510] Get noise index not valid
+```
+
+**Cause**: Gazebo 11 sensor noise configuration format incompatible with Livox plugin
+
+**Solution**: The `<noise>` configuration block has been removed from the MID360 sensor XACRO file. This warning may still appear but doesn't affect Livox plugin functionality.
+
+### 3. Livox Plugin Fails to Load
+
+**Symptom**:
+Livox point cloud data not published, no point cloud visible in RVIZ
+
+**Solution**:
+1. Ensure Gazebo plugin path is correctly set:
+   ```bash
+   export GAZEBO_PLUGIN_PATH=/home/lk/ws/quadruped_ws/install/ros2_livox_simulation/lib:$GAZEBO_PLUGIN_PATH
+   ```
+2. Verify plugin file exists:
+   ```bash
+   ls /home/lk/ws/quadruped_ws/install/ros2_livox_simulation/lib/libros2_livox.so
+   ```
+
+### 4. Gazebo Process Management
+
+**Symptoms**:
+- Port already in use: `[Err] [Master.cc:96] EXCEPTION: Unable to start server[bind: Address already in use]`
+- Multiple Gazebo instance conflicts
+- Simulation fails to shut down properly
+
+**Complete Process Cleanup Solutions**:
+```bash
+# Method 1: Quick cleanup of all related processes (Recommended)
+pkill -f gz && pkill -f gazebo && pkill -f ros2
+
+# Method 2: Step-by-step cleanup (Safer)
+# Terminate Gazebo server and client
+pkill -f gzserver
+pkill -f gzclient
+# Terminate ROS2 related processes
+pkill -f ros2
+# Clean up potential residual processes
+pkill -f rviz2
+pkill -f robot_state_publisher
+
+# Method 3: Force cleanup (When other methods fail)
+sudo pkill -9 -f gz
+sudo pkill -9 -f gazebo
+sudo pkill -9 -f ros2
+
+# Clean up Gazebo cache and temporary files
+rm -rf ~/.gazebo
+rm -rf /tmp/gazebo-*
+```
+
+**Prevention Tips**:
+- Always run cleanup commands before starting simulation
+- Use `Ctrl+C` to properly terminate simulation instead of closing terminal directly
+- If simulation hangs, try `ros2 lifecycle set` commands first, then proceed with process cleanup
+
+## Verify Livox Functionality
+
+### Check Point Cloud Topic
+
+```bash
+# List Livox point cloud topics
+ros2 topic list | grep mid360
+
+# View point cloud data (in another terminal)
+ros2 topic echo /mid360/points --no-arr | head -20
+```
+
+### Display Point Cloud in RVIZ
+
+1. Launch RVIZ: `ros2 run rviz2 rviz2`
+2. Add PointCloud2 display
+3. Set Topic to: `/mid360/points`
+4. Set Fixed Frame to: `base`
+
+## System Requirements
+
+- **Operating System**: Ubuntu 22.04
+- **ROS2 Version**: Humble
+- **Gazebo Version**: Gazebo 11 (Classic)
+- **Hardware Requirements**: OpenGL-capable graphics card, 8GB+ RAM recommended
+
+## Directory Structure
+
+- `lite3_description/`: Robot URDF descriptions and configuration files
+- `lite3_description/xacro/sensors/`: Sensor XACRO files (including fixed MID360 configuration)
+- `lite3_description/launch/`: Launch files
+- `lite3_description/config/`: Controller configuration files
+
+## Contact
+
+If you have any questions, please contact the project maintainer or submit an issue on GitHub.

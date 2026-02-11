@@ -19,19 +19,10 @@ def launch_setup(context, *args, **kwargs):
     xacro_file = os.path.join(pkg_path, 'xacro', 'robot.xacro')
     robot_description = xacro.process_file(xacro_file, mappings={'GAZEBO': 'true', 'CLASSIC': 'true'}).toxml()
 
-    rviz_config_file = os.path.join(get_package_share_directory(package_description), "config", "visualize_urdf.rviz")
-
-    rviz = Node(
-        package='rviz2',
-        executable='rviz2',
-        name='rviz_ocs2',
-        output='screen',
-        arguments=["-d", rviz_config_file]
-    )
-
+    # 只启动Gazebo服务器，不启动GUI客户端
     gazebo = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
-            [PathJoinSubstitution([FindPackageShare("gazebo_ros"), "launch", "gazebo.launch.py"])]
+            [PathJoinSubstitution([FindPackageShare("gazebo_ros"), "launch", "gzserver.launch.py"])]
         ),
         launch_arguments={"verbose": "true"}.items(),
     )
@@ -90,11 +81,7 @@ def launch_setup(context, *args, **kwargs):
         SetEnvironmentVariable(name='GTK_IM_MODULE', value=''),
         SetEnvironmentVariable(name='QT_IM_MODULE', value=''),
         SetEnvironmentVariable(name='XMODIFIERS', value=''),
-    # 添加Gazebo插件路径（移除Livox相关路径，因为我们已经移除了Livox包）
-    SetEnvironmentVariable(name='GAZEBO_PLUGIN_PATH',
-        value=(os.environ['GAZEBO_PLUGIN_PATH'] if 'GAZEBO_PLUGIN_PATH' in os.environ else '')),
 
-        rviz,
         robot_state_publisher,
         gazebo,
         spawn_entity,
