@@ -84,21 +84,14 @@ def launch_setup(context, *args, **kwargs):
         arguments=["unitree_guide_controller", "--controller-manager", "/controller_manager"],
     )
 
-    # 添加静态TF变换以解决Livox插件frame_id问题
-    livox_tf_static = Node(
-        package="tf2_ros",
-        executable="static_transform_publisher",
-        arguments=["0", "0", "0", "0", "0", "0", "mid360_link", "mid360_livox_laser"],
-        output="screen",
-    )
-
     return [
         #设置环境变量
         SetEnvironmentVariable(name='QT_QPA_PLATFORM', value='xcb'),
         SetEnvironmentVariable(name='GTK_IM_MODULE', value=''),
         SetEnvironmentVariable(name='QT_IM_MODULE', value=''),
         SetEnvironmentVariable(name='XMODIFIERS', value=''),
-    # 添加Gazebo插件路径（移除Livox相关路径，因为我们已经移除了Livox包）
+    # Gazebo 插件路径 - Livox 插件 (libros2_livox.so) 必须在此路径中
+    # 启动前请执行：export GAZEBO_PLUGIN_PATH=$(pwd)/install/ros2_livox_simulation/lib:$GAZEBO_PLUGIN_PATH
     SetEnvironmentVariable(name='GAZEBO_PLUGIN_PATH',
         value=(os.environ['GAZEBO_PLUGIN_PATH'] if 'GAZEBO_PLUGIN_PATH' in os.environ else '')),
 
@@ -107,7 +100,6 @@ def launch_setup(context, *args, **kwargs):
         gazebo,
         spawn_entity,
         leg_pd_controller,
-        livox_tf_static,
         RegisterEventHandler(
             event_handler=OnProcessExit(
                 target_action=leg_pd_controller,

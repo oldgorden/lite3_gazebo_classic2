@@ -1,57 +1,29 @@
-# Lite3 Gazebo Classic 中文使用指南
+# Lite3 Gazebo Classic 仿真
 
-## 功能特性
+Lite3 四足机器人的 Gazebo Classic 仿真环境，支持 ROS2 Humble。
 
-本仓库支持完整的Lite3四足机器人仿真，包括：
-- **Livox MID360激光雷达**：非重复扫描模式，真实点云数据仿真
-- **Realsense D435i深度相机**：RGB-D数据
-- **IMU传感器**：惯性测量单元
-- **完整控制器**：PD控制器、Unitree Guide Controller等
+## 快速开始
 
-## 安装步骤
-
-### 1. 克隆仓库
-
-```bash
-# 在ROS2工作空间的src目录中执行
-cd your_ros2_workspace/src
-git clone https://github.com/oldgorden/lite3_gazebo_classic2.git
-```
-
-### 2. 安装依赖
+### 1. 安装依赖
 
 ```bash
 # 安装系统依赖
 sudo apt update
 sudo apt install liblivox-sdk2-dev libgoogle-glog-dev
 
-# 安装ROS2依赖（仓库已包含所有必要的依赖包）
-cd your_ros2_workspace
+# 安装 ROS2 依赖
+cd ~/quadruped_ws
 rosdep install --from-paths src --ignore-src -r -y
 ```
 
-### 4. 编译工作空间
+### 2. 编译
 
 ```bash
-# 编译所有包（包括Livox相关依赖）
+cd ~/quadruped_ws
 colcon build --symlink-install
-
-# 或者只编译lite3_description包
-colcon build --packages-select lite3_description --symlink-install
 ```
 
-### 4. 设置环境变量
-
-```bash
-# 在每次运行前都需要设置
-source /usr/share/gazebo/setup.sh
-export GAZEBO_PLUGIN_PATH=$(pwd)/install/ros2_livox_simulation/lib:$GAZEBO_PLUGIN_PATH
-source install/setup.bash
-```
-
-## 运行仿真
-
-### 带GUI界面的完整仿真
+### 3. 启动仿真
 
 ```bash
 source /usr/share/gazebo/setup.sh
@@ -60,130 +32,75 @@ source install/setup.bash
 ros2 launch lite3_description gazebo_classic.launch.py
 ```
 
-这将启动：
-- Gazebo仿真环境（带GUI界面）
-- RViz可视化工具
-- 所有必要的控制器
-- Livox MID360激光雷达点云发布到 `/mid360/points` 话题
+### 4. 键盘控制
 
-### 仅服务器模式（无GUI）
+在另一个终端中启动键盘控制节点：
 
 ```bash
-source /usr/share/gazebo/setup.sh
-export GAZEBO_PLUGIN_PATH=$(pwd)/install/ros2_livox_simulation/lib:$GAZEBO_PLUGIN_PATH
 source install/setup.bash
-ros2 launch lite3_description gazebo_server_only.launch.py
+ros2 run keyboard_input keyboard_input
 ```
 
-## 常见问题及解决方案
+**控制说明**：
+- `1-8`：切换控制模式
+- `W/S/A/D`：前后左右移动
+- `I/K/J/L`：旋转控制
+- `空格`：停止运动
 
-### 1. Gazebo服务器崩溃（exit code -11）
+详细键盘控制说明请参考 [键盘控制使用指南](./docs/keyboard_control_guide.md)
 
-**问题现象**：
-```
-[ERROR] [gzserver-3]: process has died [pid XXX, exit code -11, cmd 'gzserver ...']
-```
+## 传感器配置
 
-**原因**：Livox插件与Gazebo传感器噪声配置不兼容
+### Livox Mid-360 激光雷达
 
-**解决方案**：已通过修改传感器配置文件解决。确保使用最新版本的代码，其中 `src/lite3_gazebo_classic/lite3_description/xacro/sensors/mid360_sensor.xacro` 文件中已移除噪声配置部分。
+- 话题：`/mid360/points`、`/mid360/points_PointCloud2`
+- 非重复扫描模式，真实点云数据仿真
 
-### 2. "[Err] [Sensor.cc:510] Get noise index not valid" 错误
+### Realsense D435i 相机
 
-**问题现象**：
-```
-[gzserver-3] [Err] [Sensor.cc:510] Get noise index not valid
-```
+- 话题：`/camera/color/image_raw`、`/camera/color/camera_info`
+- 仅 RGB 模式，用于 FAST-LIVO 雷达点着色
 
-**原因**：Gazebo 11中的传感器噪声配置格式与Livox插件不兼容
+详细传感器配置请参考 [传感器配置文档](./docs/sensor_configuration.md)
 
-**解决方案**：已在MID360传感器XACRO文件中移除`<noise>`配置块，避免此错误。虽然仍有此警告，但不影响Livox插件正常工作。
+## 文档
 
-### 3. Livox插件无法加载
-
-**问题现象**：
-Livox点云数据未发布，RVIZ中看不到点云
-
-**解决方案**：
-1. 确保正确设置了Gazebo插件路径：
-   ```bash
-   export GAZEBO_PLUGIN_PATH=$(pwd)/install/ros2_livox_simulation/lib:$GAZEBO_PLUGIN_PATH
-   ```
-2. 验证插件文件存在：
-   ```bash
-   ls $(pwd)/install/ros2_livox_simulation/lib/libros2_livox.so
-   ```
-
-### 4. Gazebo进程管理
-
-**问题现象**：
-- 端口被占用：`[Err] [Master.cc:96] EXCEPTION: Unable to start server[bind: Address already in use]`
-- 多个Gazebo实例冲突
-- 仿真运行后无法正常关闭
-
-**完整进程清理方案**：
-```bash
-# 方法1：快速清理所有相关进程（推荐）
-pkill -f gz && pkill -f gazebo && pkill -f ros2
-
-# 方法2：逐步清理（更安全）
-# 终止Gazebo服务器和客户端
-pkill -f gzserver
-pkill -f gzclient
-# 终止ROS2相关进程
-pkill -f ros2
-# 清理可能的残留进程
-pkill -f rviz2
-pkill -f robot_state_publisher
-
-# 方法3：强制清理（当其他方法无效时）
-sudo pkill -9 -f gz
-sudo pkill -9 -f gazebo
-sudo pkill -9 -f ros2
-
-# 清理Gazebo缓存和临时文件
-rm -rf ~/.gazebo
-rm -rf /tmp/gazebo-*
-```
-
-**预防措施**：
-- 每次运行仿真前先执行清理命令
-- 使用 `Ctrl+C` 正常终止仿真，避免直接关闭终端
-- 如果仿真卡死，先尝试 `ros2 lifecycle set` 命令，再进行进程清理
-
-## 验证Livox功能
-
-### 检查点云话题
-
-```bash
-# 查看Livox点云话题
-ros2 topic list | grep mid360
-
-# 查看点云数据（在另一个终端中）
-ros2 topic echo /mid360/points --no-arr | head -20
-```
-
-### RVIZ中显示点云
-
-1. 启动RVIZ：`ros2 run rviz2 rviz2`
-2. 添加PointCloud2显示
-3. 设置Topic为：`/mid360/points`
-4. 设置Fixed Frame为：`base`
+- [传感器配置](./docs/sensor_configuration.md) - 传感器配置和使用
+- [键盘控制指南](./docs/keyboard_control_guide.md) - 键盘控制使用说明
+- [Gazebo Livox 集成](./docs/gazebo_livox_integration.md) - Livox 雷达集成指南
+- [Realsense 配置总结](./docs/realsense_configuration_summary.md) - Realsense 相机配置
+- [故障排除](./docs/troubleshooting.md) - 常见问题及解决方案
 
 ## 系统要求
 
 - **操作系统**：Ubuntu 22.04
-- **ROS2版本**：Humble
-- **Gazebo版本**：Gazebo 11 (Classic)
-- **硬件要求**：支持OpenGL的显卡，建议8GB以上内存
+- **ROS2 版本**：Humble
+- **Gazebo 版本**：Gazebo 11 (Classic)
 
-## 目录结构说明
+## 常见问题
 
-- `lite3_description/`：机器人URDF描述和配置文件
-- `lite3_description/xacro/sensors/`：传感器XACRO文件（包括已修复的MID360配置）
-- `lite3_description/launch/`：启动文件
-- `lite3_description/config/`：控制器配置文件
+### Gazebo 插件路径
 
-## 联系方式
+每次运行前都需要设置：
+```bash
+export GAZEBO_PLUGIN_PATH=$(pwd)/install/ros2_livox_simulation/lib:$GAZEBO_PLUGIN_PATH
+```
 
-如果有任何问题，请联系项目维护者或在GitHub上提交issue。
+### 进程清理
+
+如果 Gazebo 卡死，使用以下命令清理：
+```bash
+pkill -f gz && pkill -f gazebo && pkill -f ros2
+```
+
+更多故障排除方法请参考 [故障排除指南](./docs/troubleshooting.md)
+
+## 子模块
+
+本仓库使用 Git 子模块管理依赖：
+- `livox_ros_driver2` - Livox ROS2 驱动
+- `livox_laser_simulation_ros2` - Livox 激光雷达仿真
+
+初始化子模块：
+```bash
+git submodule update --init --recursive

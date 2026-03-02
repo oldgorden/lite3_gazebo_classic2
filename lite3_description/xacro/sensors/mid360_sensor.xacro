@@ -38,11 +38,21 @@
       </inertial>
     </link>
 
+    <!-- Livox 插件发布的 frame_id 是 mid360_livox_laser，需要添加这个 frame -->
+    <link name="${name}_livox_laser"/>
+
     <!-- 关键：底座到光学中心的偏移（Livox 官方数据） -->
     <joint name="${name}_base_joint" type="fixed">
       <parent link="${name}_base_link"/>
       <child link="${name}_link"/>
       <origin xyz="-0.012 0.0 0.047" rpy="0 0 0"/>
+    </joint>
+
+    <!-- 添加 mid360_link 到 mid360_livox_laser 的静态 TF（零变换） -->
+    <joint name="${name}_livox_laser_joint" type="fixed">
+      <parent link="${name}_link"/>
+      <child link="${name}_livox_laser"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
     </joint>
 
     <!-- 安装到机器人 -->
