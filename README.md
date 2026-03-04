@@ -16,11 +16,11 @@ cd ~/quadruped_ws
 rosdep install --from-paths src --ignore-src -r -y
 
 # 初始化子模块：
+# 本仓库使用 Git 子模块管理依赖：
+# - `livox_ros_driver2` - Livox ROS2 驱动(这个包依赖Livox-SDK2)
+# - `livox_laser_simulation_ros2` - Livox 激光雷达仿真
 ```bash
 git submodule update --init --recursive
-# 本仓库使用 Git 子模块管理依赖：
-# - `livox_ros_driver2` - Livox ROS2 驱动
-# - `livox_laser_simulation_ros2` - Livox 激光雷达仿真
 ```
 
 ### 2. 编译
