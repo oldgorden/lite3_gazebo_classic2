@@ -9,11 +9,18 @@ Lite3 四足机器人的 Gazebo Classic 仿真环境，支持 ROS2 Humble。
 ```bash
 # 安装系统依赖
 sudo apt update
-sudo apt install liblivox-sdk2-dev libgoogle-glog-dev
+sudo apt install libgoogle-glog-dev
 
 # 安装 ROS2 依赖
 cd ~/quadruped_ws
 rosdep install --from-paths src --ignore-src -r -y
+
+# 初始化子模块：
+```bash
+git submodule update --init --recursive
+# 本仓库使用 Git 子模块管理依赖：
+# - `livox_ros_driver2` - Livox ROS2 驱动
+# - `livox_laser_simulation_ros2` - Livox 激光雷达仿真
 ```
 
 ### 2. 编译
@@ -124,13 +131,3 @@ fuser -k 11345/tcp
 ```
 
 更多故障排除方法请参考 [故障排除指南](./docs/troubleshooting.md)
-
-## 子模块
-
-本仓库使用 Git 子模块管理依赖：
-- `livox_ros_driver2` - Livox ROS2 驱动
-- `livox_laser_simulation_ros2` - Livox 激光雷达仿真
-
-初始化子模块：
-```bash
-git submodule update --init --recursive
