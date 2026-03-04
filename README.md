@@ -25,6 +25,21 @@ colcon build --symlink-install
 
 ### 3. 启动仿真
 
+**推荐方式 - 使用启动脚本：**
+
+```bash
+cd ~/quadruped_ws
+./run_gazebo.sh
+```
+
+启动脚本会自动：
+1. 清理残留的 Gazebo 进程
+2. 清理 Gazebo 共享内存
+3. 设置必要的环境变量（包括 `GAZEBO_PLUGIN_PATH`）
+4. 启动 Gazebo 仿真
+
+**手动启动方式：**
+
 ```bash
 source /usr/share/gazebo/setup.sh
 export GAZEBO_PLUGIN_PATH=$(pwd)/install/ros2_livox_simulation/lib:$GAZEBO_PLUGIN_PATH
@@ -81,16 +96,31 @@ ros2 run keyboard_input keyboard_input
 
 ### Gazebo 插件路径
 
-每次运行前都需要设置：
+**使用启动脚本会自动设置此环境变量**，无需手动配置。
+
+手动启动时需要设置：
 ```bash
 export GAZEBO_PLUGIN_PATH=$(pwd)/install/ros2_livox_simulation/lib:$GAZEBO_PLUGIN_PATH
 ```
 
 ### 进程清理
 
-如果 Gazebo 卡死，使用以下命令清理：
+**使用启动脚本**（推荐）：启动脚本会自动清理残留进程
+
 ```bash
-pkill -f gz && pkill -f gazebo && pkill -f ros2
+./run_gazebo.sh
+```
+
+**手动清理：**
+
+```bash
+pkill -9 -f gazebo && pkill -9 -f gzserver && pkill -9 -f gzclient && pkill -9 -f gz
+```
+
+如果仍有残留，使用以下命令检查并清理：
+```bash
+ps aux | grep -E "(gazebo|gzserver|gzclient)" | grep -v grep
+fuser -k 11345/tcp
 ```
 
 更多故障排除方法请参考 [故障排除指南](./docs/troubleshooting.md)
