@@ -19,7 +19,6 @@ rosdep install --from-paths src --ignore-src -r -y
 # 本仓库使用 Git 子模块管理依赖：
 # - `livox_ros_driver2` - Livox ROS2 驱动(这个包依赖Livox-SDK2)
 # - `livox_laser_simulation_ros2` - Livox 激光雷达仿真
-```bash
 git submodule update --init --recursive
 ```
 
@@ -35,7 +34,7 @@ colcon build --symlink-install
 **推荐方式 - 使用启动脚本：**
 
 ```bash
-cd ~/quadruped_ws
+#cd进入到脚本所在的目录
 ./run_gazebo.sh
 ```
 
