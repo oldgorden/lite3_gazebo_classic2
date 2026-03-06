@@ -70,6 +70,47 @@ ros2 run keyboard_input keyboard_input
 
 详细键盘控制说明请参考 [键盘控制使用指南](./docs/keyboard_control_guide.md)
 
+---
+
+### 5. FAST-LIVO2 SLAM 建图
+
+本工作空间已集成 FAST-LIVO2（Fast LiDAR-Inertial-Visual Odometry），支持实时 SLAM 建图。
+
+**启动 FAST-LIVO2 建图：**
+
+```bash
+# 确保 Gazebo 仿真已启动（见第 3 节）
+
+# 在另一个终端中启动 FAST-LIVO2
+cd ~/quadruped_ws
+source install/setup.bash
+
+# 启动建图（不带 RViz）
+ros2 launch fast_livo mapping_gazebo.launch.py
+
+# 或带 RViz 可视化
+ros2 launch fast_livo mapping_gazebo.launch.py use_rviz:=True
+```
+
+**配置说明**：
+- 激光雷达话题：`/livox/lidar`
+- IMU 话题：`/livox/imu`（已自动从 `/imu_sensor_broadcaster/imu` 重映射）
+- 相机话题：`/camera/camera/color/image_raw`
+- 时间同步：自动使用仿真时间（`use_sim_time:=True`）
+
+**输出话题**：
+- `/cloud_registered` - 注册后的点云地图（~10-16 Hz）
+- `/cloud_effected` - 特征点云
+- `/cloud_visual_sub_map_before` - 视觉子地图
+
+**建图流程**：
+1. 启动 Gazebo 仿真（终端 1）
+2. 启动 FAST-LIVO2（终端 2）
+3. 使用键盘控制机器人移动建图
+4. 在 RViz 中查看实时建图效果
+
+> **注意**：FAST-LIVO2 需要 `rpg_vikit` 和 `livox_ros_driver2` 依赖，这些已作为子模块包含在本工作空间中。
+
 ## 传感器配置
 
 ### Livox Mid-360 激光雷达
