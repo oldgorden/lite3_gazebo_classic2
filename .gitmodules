@@ -4,3 +4,9 @@
 [submodule "src/livox_laser_simulation_ros2"]
 	path = src/livox_laser_simulation_ros2
 	url = https://github.com/oldgorden/livox_laser_simulation_ros2.git
+[submodule "src/rpg_vikit"]
+	path = src/rpg_vikit
+	url = https://github.com/oldgorden/rpg_vikit.git
+[submodule "src/FAST-LIVO2"]
+	path = src/FAST-LIVO2
+	url = https://github.com/oldgorden/FAST-LIVO2.git
