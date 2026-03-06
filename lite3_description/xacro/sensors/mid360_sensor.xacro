@@ -101,9 +101,9 @@
           
           <!-- 扫描模式文件路径（必须在包内存在） -->
           <csv_file_name>$(find ros2_livox_simulation)/scan_mode/mid360.csv</csv_file_name>
-          
+
           <!-- ROS2 话题配置 -->
-          <topic>/mid360/points</topic>
+          <topic>/livox/lidar</topic>
           <frame_id>${name}_link</frame_id>
         </plugin>
       </sensor>
