@@ -3,8 +3,6 @@
 # Gazebo 仿真启动脚本
 # 功能：清理残留进程并启动 Gazebo 仿真环境
 
-# 注意：不使用 set -e，因为 pkill 在没有匹配进程时会返回 1
-
 # 颜色定义
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -13,7 +11,8 @@ NC='\033[0m' # No Color
 
 # 获取脚本所在目录的父目录（即工作空间根目录）
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-WORKSPACE_ROOT="$(dirname "$SCRIPT_DIR")"
+# 【修正点】这里需要向上跳两级：lite3_gazebo_classic -> src -> quadruped_ws
+WORKSPACE_ROOT="$(dirname "$(dirname "$SCRIPT_DIR")")"
 
 echo -e "${GREEN}========================================${NC}"
 echo -e "${GREEN}  Gazebo 仿真启动脚本${NC}"
@@ -22,16 +21,12 @@ echo -e "${GREEN}========================================${NC}"
 
 # 步骤 1: 清理残留的 Gazebo 进程
 echo -e "${YELLOW}[1/5] 清理残留的 Gazebo 进程...${NC}"
-# 注意：不能使用 pkill -f gazebo，因为这会杀死当前脚本本身 (run_gazebo.sh)
-# 使用更精确的进程名匹配
 pkill -9 -x gzserver 2>/dev/null || true
 pkill -9 -x gzclient 2>/dev/null || true
 pkill -9 -x gazebo 2>/dev/null || true
-# 清理 gazebo 相关进程，但排除当前脚本
 ps aux | grep -E "gazebo|gzserver|gzclient" | grep -v grep | grep -v run_gazebo.sh | awk '{print $2}' | xargs -r kill -9 2>/dev/null || true
 sleep 1
 
-# 检查是否还有残留进程
 REMAINING=$(ps aux | grep -E "(gazebo|gzserver|gzclient)" | grep -v grep | wc -l)
 if [ "$REMAINING" -gt 0 ]; then
     echo -e "${RED}警告：仍有 $REMAINING 个 Gazebo 相关进程在运行${NC}"
@@ -41,14 +36,13 @@ if [ "$REMAINING" -gt 0 ]; then
     sleep 1
 fi
 
-# 步骤 2: 清理 Gazebo 共享内存（如果有）
+# 步骤 2: 清理 Gazebo 共享内存
 echo -e "${YELLOW}[2/5] 清理 Gazebo 共享内存...${NC}"
 rm -f /tmp/gazebo_* 2>/dev/null || true
 
 # 步骤 3: 设置环境变量
 echo -e "${YELLOW}[3/5] 设置环境变量...${NC}"
 
-# 检查 Gazebo 是否已安装
 if [ -f "/usr/share/gazebo/setup.sh" ]; then
     source /usr/share/gazebo/setup.sh
     echo -e "${GREEN}  ✓ 已加载 Gazebo 环境${NC}"
@@ -56,7 +50,6 @@ else
     echo -e "${YELLOW}  ! /usr/share/gazebo/setup.sh 不存在，跳过${NC}"
 fi
 
-# 设置 GAZEBO_PLUGIN_PATH
 LIVOX_PLUGIN_PATH="${WORKSPACE_ROOT}/install/ros2_livox_simulation/lib"
 if [ -d "$LIVOX_PLUGIN_PATH" ]; then
     export GAZEBO_PLUGIN_PATH="${LIVOX_PLUGIN_PATH}:${GAZEBO_PLUGIN_PATH:-}"
@@ -81,6 +74,7 @@ echo -e "${GREEN}  启动命令：ros2 launch lite3_description gazebo_classic.l
 echo -e "${GREEN}========================================${NC}"
 echo ""
 
+# 【重要】修正了路径后，这里就能正确找到 setup.bash 了
 cd "$WORKSPACE_ROOT"
 source install/setup.bash
 ros2 launch lite3_description gazebo_classic.launch.py

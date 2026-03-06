@@ -84,6 +84,17 @@ def launch_setup(context, *args, **kwargs):
         arguments=["unitree_guide_controller", "--controller-manager", "/controller_manager"],
     )
 
+    # FASTLIVO2 IMU 话题重映射节点
+    # 将 /imu_sensor_broadcaster/imu 重映射到 /livox/imu
+    imu_relay = Node(
+        package='topic_tools',
+        executable='relay',
+        name='imu_relay',
+        arguments=['/imu_sensor_broadcaster/imu', '/livox/imu'],
+        output='screen',
+        parameters=[{'use_sim_time': True}]
+    )
+
     return [
         #设置环境变量
         SetEnvironmentVariable(name='QT_QPA_PLATFORM', value='xcb'),
@@ -100,6 +111,7 @@ def launch_setup(context, *args, **kwargs):
         gazebo,
         spawn_entity,
         leg_pd_controller,
+        imu_relay,  # FASTLIVO2 IMU 重映射
         RegisterEventHandler(
             event_handler=OnProcessExit(
                 target_action=leg_pd_controller,
