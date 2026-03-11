@@ -85,10 +85,7 @@ ros2 run keyboard_input keyboard_input
 cd ~/quadruped_ws
 source install/setup.bash
 
-# 启动建图（不带 RViz）
-ros2 launch fast_livo mapping_gazebo.launch.py
-
-# 或带 RViz 可视化
+# 带 RViz 可视化
 ros2 launch fast_livo mapping_gazebo.launch.py use_rviz:=True
 ```
 
@@ -97,6 +94,14 @@ ros2 launch fast_livo mapping_gazebo.launch.py use_rviz:=True
 - IMU 话题：`/livox/imu`（已自动从 `/imu_sensor_broadcaster/imu` 重映射）
 - 相机话题：`/camera/camera/color/image_raw`
 - 时间同步：自动使用仿真时间（`use_sim_time:=True`）
+
+**配置文件**：
+- **仿真环境**：使用 `mid360_sim.yaml` 和 `camera_sim.yaml`
+  - 外参根据 xacro 机器人模型自动计算
+  - IMU 在雷达坐标系下：`extrinsic_T = [0.012, 0.0, -0.127]`
+  - 相机在雷达坐标系下：`Pcl = [0.197, 0.0175, -0.0745]`
+- **实物环境**：使用 `mid360.yaml` 和 `camera_d435i.yaml`
+  - 需要根据实际传感器安装位置标定外参
 
 **输出话题**：
 - `/cloud_registered` - 注册后的点云地图（~10-16 Hz）
