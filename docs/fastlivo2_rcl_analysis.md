@@ -239,16 +239,3 @@ extrin_calib:
   Rcl: [0.0, -1.0, 0.0, 0.0, 0.0, -1.0, 1.0, 0.0, 0.0]  # ✅ 正确
   Pcl: [0.197, 0.0175, -0.0745]
 ```
-
-## 验证脚本
-
-```bash
-# 分析转圈扫描时的点云分布
-python3 livox_analysis.py
-
-# 分析配置 3 的着色错误原因
-python3 reanalyze_config3.py
-
-# 分析配置 1 和 2 的像素差异
-python3 analyze_rcl_difference.py
-```
