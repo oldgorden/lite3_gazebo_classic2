@@ -4,6 +4,8 @@
 
 #include "unitree_guide_controller/UnitreeGuideController.h"
 
+#include <algorithm>
+
 #include <unitree_guide_controller/gait/WaveGenerator.h>
 #include "unitree_guide_controller/robot/QuadrupedRobot.h"
 
@@ -71,6 +73,12 @@ namespace unitree_guide_controller
             return controller_interface::return_type::OK;
         }
 
+        if (!ctrl_interfaces_.motion_command_.cmd_vel_active_ ||
+            (time - last_cmd_vel_time_).seconds() > cmd_vel_timeout_)
+        {
+            ctrl_interfaces_.motion_command_.reset_twist();
+        }
+
         ctrl_component_.robot_model_->update();
         ctrl_component_.wave_generator_->update();
         ctrl_component_.estimator_->update();
@@ -122,6 +130,7 @@ namespace unitree_guide_controller
             stand_pos_ = auto_declare<std::vector<double>>("stand_pos", stand_pos_);
             stand_kp_ = auto_declare<double>("stand_kp", stand_kp_);
             stand_kd_ = auto_declare<double>("stand_kd", stand_kd_);
+            cmd_vel_timeout_ = auto_declare<double>("cmd_vel_timeout", cmd_vel_timeout_);
 
             get_node()->get_parameter("update_rate", ctrl_interfaces_.frequency_);
             RCLCPP_INFO(get_node()->get_logger(), "Controller Manager Update Rate: %d Hz", ctrl_interfaces_.frequency_);
@@ -140,15 +149,22 @@ namespace unitree_guide_controller
     controller_interface::CallbackReturn UnitreeGuideController::on_configure(
         const rclcpp_lifecycle::State& /*previous_state*/)
     {
-        control_input_subscription_ = get_node()->create_subscription<control_input_msgs::msg::Inputs>(
-            "/control_input", 10, [this](const control_input_msgs::msg::Inputs::SharedPtr msg)
+        last_cmd_vel_time_ = get_node()->now();
+
+        cmd_vel_subscription_ = get_node()->create_subscription<geometry_msgs::msg::Twist>(
+            "/cmd_vel", 10, [this](const geometry_msgs::msg::Twist::SharedPtr msg)
             {
-                // Handle message
-                ctrl_interfaces_.control_inputs_.command = msg->command;
-                ctrl_interfaces_.control_inputs_.lx = msg->lx;
-                ctrl_interfaces_.control_inputs_.ly = msg->ly;
-                ctrl_interfaces_.control_inputs_.rx = msg->rx;
-                ctrl_interfaces_.control_inputs_.ry = msg->ry;
+                ctrl_interfaces_.motion_command_.linear_x_ = msg->linear.x;
+                ctrl_interfaces_.motion_command_.linear_y_ = msg->linear.y;
+                ctrl_interfaces_.motion_command_.angular_z_ = msg->angular.z;
+                ctrl_interfaces_.motion_command_.cmd_vel_active_ = true;
+                last_cmd_vel_time_ = get_node()->now();
+            });
+
+        robot_mode_subscription_ = get_node()->create_subscription<std_msgs::msg::Int32>(
+            "/robot_mode", 10, [this](const std_msgs::msg::Int32::SharedPtr msg)
+            {
+                ctrl_interfaces_.motion_command_.requested_state_ = modeRequestToState(msg->data);
             });
 
         robot_description_subscription_ = get_node()->create_subscription<std_msgs::msg::String>(
@@ -213,6 +229,8 @@ namespace unitree_guide_controller
         next_state_ = current_state_;
         next_state_name_ = current_state_->state_name;
         mode_ = FSMMode::NORMAL;
+        ctrl_interfaces_.motion_command_.requested_state_ = FSMStateName::PASSIVE;
+        ctrl_interfaces_.motion_command_.reset_twist();
 
         return CallbackReturn::SUCCESS;
     }
@@ -264,6 +282,29 @@ namespace unitree_guide_controller
             return state_list_.balanceTest;
         default:
             return state_list_.invalid;
+        }
+    }
+
+    FSMStateName UnitreeGuideController::modeRequestToState(const int mode_request)
+    {
+        switch (mode_request)
+        {
+        case 1:
+            return FSMStateName::PASSIVE;
+        case 2:
+            return FSMStateName::FIXEDDOWN;
+        case 3:
+            return FSMStateName::FIXEDSTAND;
+        case 4:
+            return FSMStateName::TROTTING;
+        case 5:
+            return FSMStateName::FREESTAND;
+        case 6:
+            return FSMStateName::SWINGTEST;
+        case 7:
+            return FSMStateName::BALANCETEST;
+        default:
+            return FSMStateName::INVALID;
         }
     }
 }

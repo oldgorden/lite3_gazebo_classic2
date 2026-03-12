@@ -26,7 +26,6 @@ void StateFixedDown::enter()
     {
         start_pos_[i] = ctrl_interfaces_.joint_position_state_interface_[i].get().get_value();
     }
-    ctrl_interfaces_.control_inputs_.command = 0;
     for (int i = 0; i < 12; i++)
     {
         ctrl_interfaces_.joint_position_command_interface_[i].get().set_value(start_pos_[i]);
@@ -59,11 +58,11 @@ FSMStateName StateFixedDown::checkChange()
     {
         return FSMStateName::FIXEDDOWN;
     }
-    switch (ctrl_interfaces_.control_inputs_.command)
+    switch (ctrl_interfaces_.motion_command_.requested_state_)
     {
-    case 1:
+    case FSMStateName::PASSIVE:
         return FSMStateName::PASSIVE;
-    case 2:
+    case FSMStateName::FIXEDSTAND:
         return FSMStateName::FIXEDSTAND;
     default:
         return FSMStateName::FIXEDDOWN;

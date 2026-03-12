@@ -14,8 +14,8 @@ set(CONTROLLER_INCLUDE_DEPENDS
         rcpputils
         controller_interface
         realtime_tools
+        geometry_msgs
         std_msgs
-        control_input_msgs
         controller_common
         kdl_parser
 )

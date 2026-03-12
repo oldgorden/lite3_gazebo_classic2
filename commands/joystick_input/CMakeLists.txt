@@ -9,9 +9,10 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
+find_package(geometry_msgs REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
-find_package(control_input_msgs REQUIRED)
+find_package(std_msgs REQUIRED)
 
 add_executable(joystick_input src/JoystickInput.cpp)
 target_include_directories(joystick_input
@@ -20,9 +21,10 @@ target_include_directories(joystick_input
         "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
 ament_target_dependencies(
         joystick_input PUBLIC
+        geometry_msgs
         rclcpp
         sensor_msgs
-        control_input_msgs
+        std_msgs
 )
 
 install(TARGETS

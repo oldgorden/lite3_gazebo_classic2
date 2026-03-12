@@ -1,34 +1,19 @@
-# Joystick Input
+# joystick_input
 
-This node will listen to the joystick topic and publish a control_input_msgs/Input message.
+Lite3 主控制链的普通手柄遥操作节点。
 
-Tested environment:
-* Ubuntu 24.04
-  * ROS2 Jazzy
-  * Logitech F310 Gamepad
+## 输出话题
 
-```bash
-cd ~/ros2_ws
-colcon build --packages-up-to joystick_input
-```
+- `/cmd_vel`
+- `/robot_mode`
+
+## 运行
 
 ```bash
-source ~/ros2_ws/install/setup.bash
+source install/setup.bash
 ros2 launch joystick_input joystick.launch.py
 ```
 
-## 1. Use Instructions for Unitree Guide
+## 参考
 
-### 1.1 Control Mode
-
-* Passive Mode: LB + B
-* Fixed Stand: LB + A
-    * Free Stand: LB + X
-    * Trot: LB + Y
-    * SwingTest: LT + B
-    * Balance: LT + A
-
-### 1.2 Control Input
-
-* WASD IJKL: Move robot
-* Space: Reset Speed Input
+- 标准接口定义见 [control_interface_spec.md](/home/longkang/quadruped_ws/src/lite3_gazebo_classic/docs/control_interface_spec.md)

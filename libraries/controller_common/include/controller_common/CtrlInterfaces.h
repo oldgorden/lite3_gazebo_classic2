@@ -6,9 +6,28 @@
 #define INTERFACE_H
 
 #include <vector>
+
 #include <hardware_interface/loaned_command_interface.hpp>
 #include <hardware_interface/loaned_state_interface.hpp>
-#include <control_input_msgs/msg/inputs.hpp>
+
+#include <controller_common/common/enumClass.h>
+
+struct MotionCommand
+{
+    FSMStateName requested_state_{FSMStateName::PASSIVE};
+    double linear_x_{0.0};
+    double linear_y_{0.0};
+    double angular_z_{0.0};
+    bool cmd_vel_active_{false};
+
+    void reset_twist()
+    {
+        linear_x_ = 0.0;
+        linear_y_ = 0.0;
+        angular_z_ = 0.0;
+        cmd_vel_active_ = false;
+    }
+};
 
 struct CtrlInterfaces
 {
@@ -39,9 +58,7 @@ struct CtrlInterfaces
 
     std::vector<std::reference_wrapper<hardware_interface::LoanedStateInterface>>
     odom_state_interface_;
-
-
-    control_input_msgs::msg::Inputs control_inputs_;
+    MotionCommand motion_command_;
     int frequency_{};
 
     CtrlInterfaces() = default;

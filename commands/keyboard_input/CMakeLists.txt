@@ -9,8 +9,9 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
+find_package(geometry_msgs REQUIRED)
 find_package(rclcpp REQUIRED)
-find_package(control_input_msgs REQUIRED)
+find_package(std_msgs REQUIRED)
 
 add_executable(keyboard_input src/KeyboardInput.cpp)
 target_include_directories(keyboard_input
@@ -19,12 +20,18 @@ target_include_directories(keyboard_input
         "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
 ament_target_dependencies(
         keyboard_input PUBLIC
+        geometry_msgs
         rclcpp
-        control_input_msgs
+        std_msgs
 )
 
 install(TARGETS
         keyboard_input
         DESTINATION lib/${PROJECT_NAME})
+
+install(
+        DIRECTORY launch
+        DESTINATION share/${PROJECT_NAME}/
+)
 
 ament_package()

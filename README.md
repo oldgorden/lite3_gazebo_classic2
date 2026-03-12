@@ -1,24 +1,17 @@
 # Lite3 Gazebo Classic 仿真
 
-Lite3 四足机器人的 Gazebo Classic 仿真环境，支持 ROS2 Humble。
+Lite3 四足机器人的 Gazebo Classic 仿真环境，支持 ROS 2 Humble。
 
 ## 快速开始
 
 ### 1. 安装依赖
 
 ```bash
-# 安装系统依赖
 sudo apt update
 sudo apt install libgoogle-glog-dev
 
-# 安装 ROS2 依赖
 cd ~/quadruped_ws
 rosdep install --from-paths src --ignore-src -r -y
-
-# 初始化子模块：
-# 本仓库使用 Git 子模块管理依赖：
-# - `livox_ros_driver2` - Livox ROS2 驱动(这个包依赖Livox-SDK2)
-# - `livox_laser_simulation_ros2` - Livox 激光雷达仿真
 git submodule update --init --recursive
 ```
 
@@ -31,20 +24,13 @@ colcon build --symlink-install
 
 ### 3. 启动仿真
 
-**推荐方式 - 使用启动脚本：**
+推荐方式：
 
 ```bash
-#cd进入到脚本所在的目录
 ./run_gazebo.sh
 ```
 
-启动脚本会自动：
-1. 清理残留的 Gazebo 进程
-2. 清理 Gazebo 共享内存
-3. 设置必要的环境变量（包括 `GAZEBO_PLUGIN_PATH`）
-4. 启动 Gazebo 仿真
-
-**手动启动方式：**
+手动方式：
 
 ```bash
 source /usr/share/gazebo/setup.sh
@@ -53,126 +39,69 @@ source install/setup.bash
 ros2 launch lite3_description gazebo_classic.launch.py
 ```
 
-### 4. 键盘控制
-
-在另一个终端中启动键盘控制节点：
+### 4. 启动主链遥操作
 
 ```bash
 source install/setup.bash
 ros2 run keyboard_input keyboard_input
 ```
 
-**控制说明**：
-- `1-8`：切换控制模式
-- `W/S/A/D`：前后左右移动
-- `I/K/J/L`：旋转控制
-- `空格`：停止运动
+主链模式键：
 
-详细键盘控制说明请参考 [键盘控制使用指南](./docs/keyboard_control_guide.md)
+- `1`：`PASSIVE`
+- `2`：`FIXEDDOWN`
+- `3`：`FIXEDSTAND`
+- `4`：`TROTTING`
 
----
+运动控制键：
 
-### 5. FAST-LIVO2 SLAM 建图
+- `W/S`：前后
+- `A/D`：横移
+- `Q/E`：偏航
+- `空格`：清零当前运动指令
 
-本工作空间已集成 FAST-LIVO2（Fast LiDAR-Inertial-Visual Odometry），支持实时 SLAM 建图。
+### 5. FAST-LIVO2 使用
 
-**启动 FAST-LIVO2 建图：**
+在仿真启动后，可在另一个终端启动 FAST-LIVO2：
 
 ```bash
-# 确保 Gazebo 仿真已启动（见第 3 节）
-
-# 在另一个终端中启动 FAST-LIVO2
 cd ~/quadruped_ws
 source install/setup.bash
-
-# 带 RViz 可视化
 ros2 launch fast_livo mapping_gazebo.launch.py use_rviz:=True
 ```
 
-**配置说明**：
-- 激光雷达话题：`/livox/lidar`
-- IMU 话题：`/livox/imu`（已自动从 `/imu_sensor_broadcaster/imu` 重映射）
-- 相机话题：`/camera/camera/color/image_raw`
-- 时间同步：自动使用仿真时间（`use_sim_time:=True`）
+当前仿真链路中：
 
-**配置文件**：
-- **仿真环境**：使用 `mid360_sim.yaml` 和 `camera_sim.yaml`
-  - 外参根据 xacro 机器人模型自动计算
-  - IMU 在雷达坐标系下：`extrinsic_T = [0.012, 0.0, -0.127]`
-  - 相机在雷达坐标系下：`Pcl = [0.197, 0.0175, -0.0745]`
-- **实物环境**：使用 `mid360.yaml` 和 `camera_d435i.yaml`
-  - 需要根据实际传感器安装位置标定外参
+- 激光雷达输入来自 Livox 仿真插件
+- IMU 输入由控制器广播并映射到 FAST-LIVO2 所需话题
+- 相机输入来自仿真 D435i RGB 相机
 
-**输出话题**：
-- `/cloud_registered` - 注册后的点云地图（~10-16 Hz）
-- `/cloud_effected` - 特征点云
-- `/cloud_visual_sub_map_before` - 视觉子地图
+Rcl 外参分析与结论见：
 
-**建图流程**：
-1. 启动 Gazebo 仿真（终端 1）
-2. 启动 FAST-LIVO2（终端 2）
-3. 使用键盘控制机器人移动建图
-4. 在 RViz 中查看实时建图效果
+- [FAST-LIVO2 Rcl 分析](/home/longkang/quadruped_ws/src/lite3_gazebo_classic/docs/fastlivo2_rcl_analysis.md)
 
-> **注意**：FAST-LIVO2 需要 `rpg_vikit` 和 `livox_ros_driver2` 依赖，这些已作为子模块包含在本工作空间中。
+## 标准控制接口
 
-## 传感器配置
+当前稳定的外部控制接口为：
 
-### Livox Mid-360 激光雷达
+- `/cmd_vel`
+- `/robot_mode`
 
-- 话题：`/mid360/points`、`/mid360/points_PointCloud2`
-- 非重复扫描模式，真实点云数据仿真
+详细约定见：
 
-### Realsense D435i 相机
+- [控制接口规范](/home/longkang/quadruped_ws/src/lite3_gazebo_classic/docs/control_interface_spec.md)
 
-- 话题：`/camera/color/image_raw`、`/camera/color/camera_info`
-- 仅 RGB 模式，用于 FAST-LIVO 雷达点着色
+## 文档导航
 
-详细传感器配置请参考 [传感器配置文档](./docs/sensor_configuration.md)
+- [文档索引](/home/longkang/quadruped_ws/src/lite3_gazebo_classic/docs/README.md)
+- [控制接口规范](/home/longkang/quadruped_ws/src/lite3_gazebo_classic/docs/control_interface_spec.md)
+- [键盘控制指南](/home/longkang/quadruped_ws/src/lite3_gazebo_classic/docs/keyboard_control_guide.md)
+- [传感器配置](/home/longkang/quadruped_ws/src/lite3_gazebo_classic/docs/sensor_configuration.md)
+- [FAST-LIVO2 Rcl 分析](/home/longkang/quadruped_ws/src/lite3_gazebo_classic/docs/fastlivo2_rcl_analysis.md)
+- [故障排除](/home/longkang/quadruped_ws/src/lite3_gazebo_classic/docs/troubleshooting.md)
 
-## 文档
+## 运行环境
 
-- [传感器配置](./docs/sensor_configuration.md) - 传感器配置和使用
-- [键盘控制指南](./docs/keyboard_control_guide.md) - 键盘控制使用说明
-- [Gazebo Livox 集成](./docs/gazebo_livox_integration.md) - Livox 雷达集成指南
-- [Realsense 配置总结](./docs/realsense_configuration_summary.md) - Realsense 相机配置
-- [故障排除](./docs/troubleshooting.md) - 常见问题及解决方案
-
-## 系统要求
-
-- **操作系统**：Ubuntu 22.04
-- **ROS2 版本**：Humble
-- **Gazebo 版本**：Gazebo 11 (Classic)
-
-## 常见问题
-
-### Gazebo 插件路径
-
-**使用启动脚本会自动设置此环境变量**，无需手动配置。
-
-手动启动时需要设置：
-```bash
-export GAZEBO_PLUGIN_PATH=$(pwd)/install/ros2_livox_simulation/lib:$GAZEBO_PLUGIN_PATH
-```
-
-### 进程清理
-
-**使用启动脚本**（推荐）：启动脚本会自动清理残留进程
-
-```bash
-./run_gazebo.sh
-```
-
-**手动清理：**
-
-```bash
-pkill -9 -f gazebo && pkill -9 -f gzserver && pkill -9 -f gzclient && pkill -9 -f gz
-```
-
-如果仍有残留，使用以下命令检查并清理：
-```bash
-ps aux | grep -E "(gazebo|gzserver|gzclient)" | grep -v grep
-fuser -k 11345/tcp
-```
-
-更多故障排除方法请参考 [故障排除指南](./docs/troubleshooting.md)
+- Ubuntu 22.04
+- ROS 2 Humble
+- Gazebo 11 Classic

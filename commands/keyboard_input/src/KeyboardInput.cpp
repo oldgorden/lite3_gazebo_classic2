@@ -2,168 +2,117 @@
 // Created by biao on 24-9-11.
 //
 
+#include <algorithm>
+
 #include <keyboard_input/KeyboardInput.h>
 
-KeyboardInput::KeyboardInput() : Node("keyboard_input_node") {
-    publisher_ = create_publisher<control_input_msgs::msg::Inputs>("control_input", 10);
-    timer_ = create_wall_timer(std::chrono::microseconds(100), std::bind(&KeyboardInput::timer_callback, this));
-    inputs_ = control_input_msgs::msg::Inputs();
+KeyboardInput::KeyboardInput() : Node("keyboard_input_node")
+{
+    cmd_vel_publisher_ = create_publisher<geometry_msgs::msg::Twist>("/cmd_vel", 10);
+    robot_mode_publisher_ = create_publisher<std_msgs::msg::Int32>("/robot_mode", 10);
+    timer_ = create_wall_timer(std::chrono::milliseconds(50), std::bind(&KeyboardInput::timer_callback, this));
+
+    declare_parameter("linear_step", linear_step_);
+    declare_parameter("lateral_step", lateral_step_);
+    declare_parameter("angular_step", angular_step_);
+    declare_parameter("max_linear_x", max_linear_x_);
+    declare_parameter("max_linear_y", max_linear_y_);
+    declare_parameter("max_angular_z", max_angular_z_);
+
+    get_parameter("linear_step", linear_step_);
+    get_parameter("lateral_step", lateral_step_);
+    get_parameter("angular_step", angular_step_);
+    get_parameter("max_linear_x", max_linear_x_);
+    get_parameter("max_linear_y", max_linear_y_);
+    get_parameter("max_angular_z", max_angular_z_);
 
     tcgetattr(STDIN_FILENO, &old_tio_);
     new_tio_ = old_tio_;
     new_tio_.c_lflag &= (~ICANON & ~ECHO);
     tcsetattr(STDIN_FILENO, TCSANOW, &new_tio_);
-    RCLCPP_INFO(get_logger(), "Keyboard input node started.");
-    RCLCPP_INFO(get_logger(), "Press 1-0 to switch between different modes");
-    RCLCPP_INFO(get_logger(), "Use W/S/A/D and I/K/J/L to move the robot.");
-    RCLCPP_INFO(get_logger(), "Please input keys, press Ctrl+C to quit.");
+
+    RCLCPP_INFO(get_logger(), "Keyboard teleop started.");
+    RCLCPP_INFO(get_logger(), "Modes: 1 passive, 2 fixeddown, 3 fixedstand, 4 trotting.");
+    RCLCPP_INFO(get_logger(), "Motion: W/S forward, A/D lateral, Q/E yaw, space stop.");
 }
 
-void KeyboardInput::timer_callback() {
-    // 松手检测看门狗 (200ms 超时)
-    static int no_key_count = 0;
-    const int TIMEOUT_CYCLES = 2000;  // 200ms (100us per cycle)
-
-    if (kbhit()) {
-        char key = getchar();
-        check_command(key);
-        if (inputs_.command == 0) {
-            check_value(key);
-            // 有运动按键，重置松手计数器
-            no_key_count = TIMEOUT_CYCLES;
-        } else {
-            inputs_.lx = 0;
-            inputs_.ly = 0;
-            inputs_.rx = 0;
-            inputs_.ry = 0;
-            reset_count_ = 100;
-        }
-        publisher_->publish(inputs_);
-        just_published_ = true;
-    } else {
-        // 松手检测核心逻辑
-        if (no_key_count > 0) {
-            no_key_count--;
-            if (no_key_count == 0) {
-                // 强制归零所有速度指令
-                inputs_.lx = 0;
-                inputs_.ly = 0;
-                inputs_.rx = 0;
-                inputs_.ry = 0;
-                publisher_->publish(inputs_);
-                RCLCPP_INFO(get_logger(), "Auto stop (key released).");
-            }
-        }
-
-        // 原有的 command 重置逻辑
-        if (just_published_) {
-            reset_count_ -= 1;
-            if (reset_count_ == 0) {
-                just_published_ = false;
-                if (inputs_.command != 0) {
-                    inputs_.command = 0;
-                    publisher_->publish(inputs_);
-                }
-            }
-        }
+void KeyboardInput::timer_callback()
+{
+    if (kbhit())
+    {
+        handle_key(static_cast<char>(getchar()));
     }
+
+    cmd_vel_publisher_->publish(twist_msg_);
 }
 
-void KeyboardInput::check_command(const char key) {
-    switch (key) {
-        case '1':
-            inputs_.command = 1; // L2_B
-            break;
-        case '2':
-            inputs_.command = 2; // L2_A
-            break;
-        case '3':
-            inputs_.command = 3; // L2_X
-            break;
-        case '4':
-            inputs_.command = 4; // L2_Y
-            break;
-        case '5':
-            inputs_.command = 5; // L1_A
-            break;
-        case '6':
-            inputs_.command = 6; // L1_B
-            break;
-        case '7':
-            inputs_.command = 7; // L1_X
-            break;
-        case '8':
-            inputs_.command = 8; // L1_Y
-            break;
-        case '9':
-            inputs_.command = 9;
-            break;
-        case '0':
-            inputs_.command = 10;
+void KeyboardInput::handle_key(const char key)
+{
+    switch (key)
+    {
+    case '1':
+    case '2':
+    case '3':
+    case '4':
+        publish_mode(key - '0');
+        return;
+    case 'w':
+    case 'W':
+        twist_msg_.linear.x = std::clamp(twist_msg_.linear.x + linear_step_, -max_linear_x_, max_linear_x_);
         break;
-        case ' ':
-            inputs_.lx = 0;
-            inputs_.ly = 0;
-            inputs_.rx = 0;
-            inputs_.ry = 0;
-            inputs_.command = 0;
-            break;
-        default:
-            inputs_.command = 0;
-            break;
+    case 's':
+    case 'S':
+        twist_msg_.linear.x = std::clamp(twist_msg_.linear.x - linear_step_, -max_linear_x_, max_linear_x_);
+        break;
+    case 'a':
+    case 'A':
+        twist_msg_.linear.y = std::clamp(twist_msg_.linear.y + lateral_step_, -max_linear_y_, max_linear_y_);
+        break;
+    case 'd':
+    case 'D':
+        twist_msg_.linear.y = std::clamp(twist_msg_.linear.y - lateral_step_, -max_linear_y_, max_linear_y_);
+        break;
+    case 'q':
+    case 'Q':
+        twist_msg_.angular.z = std::clamp(twist_msg_.angular.z + angular_step_, -max_angular_z_, max_angular_z_);
+        break;
+    case 'e':
+    case 'E':
+        twist_msg_.angular.z = std::clamp(twist_msg_.angular.z - angular_step_, -max_angular_z_, max_angular_z_);
+        break;
+    case ' ':
+        stop_motion();
+        break;
+    default:
+        break;
     }
 }
 
-void KeyboardInput::check_value(char key) {
-    switch (key) {
-        case 'w':
-        case 'W':
-            inputs_.ly = min<float>(inputs_.ly + sensitivity_left_, 1.0);
-            break;
-        case 's':
-        case 'S':
-            inputs_.ly = max<float>(inputs_.ly - sensitivity_left_, -1.0);
-            break;
-        case 'd':
-        case 'D':
-            inputs_.lx = min<float>(inputs_.lx + sensitivity_left_, 1.0);
-            break;
-        case 'a':
-        case 'A':
-            inputs_.lx = max<float>(inputs_.lx - sensitivity_left_, -1.0);
-            break;
-
-        case 'i':
-        case 'I':
-            inputs_.ry = min<float>(inputs_.ry + sensitivity_right_, 1.0);
-            break;
-        case 'k':
-        case 'K':
-            inputs_.ry = max<float>(inputs_.ry - sensitivity_right_, -1.0);
-            break;
-        case 'l':
-        case 'L':
-            inputs_.rx = min<float>(inputs_.rx + sensitivity_right_, 1.0);
-            break;
-        case 'j':
-        case 'J':
-            inputs_.rx = max<float>(inputs_.rx - sensitivity_right_, -1.0);
-            break;
-        default:
-            break;
-    }
+void KeyboardInput::publish_mode(const int mode)
+{
+    std_msgs::msg::Int32 mode_msg;
+    mode_msg.data = mode;
+    robot_mode_publisher_->publish(mode_msg);
+    RCLCPP_INFO(get_logger(), "Requested robot mode: %d", mode);
 }
 
-bool KeyboardInput::kbhit() {
+void KeyboardInput::stop_motion()
+{
+    twist_msg_ = geometry_msgs::msg::Twist();
+    RCLCPP_INFO(get_logger(), "Motion command reset.");
+}
+
+bool KeyboardInput::kbhit()
+{
     timeval tv = {0L, 0L};
     fd_set fds;
     FD_ZERO(&fds);
     FD_SET(STDIN_FILENO, &fds);
-    return select(STDIN_FILENO + 1, &fds, NULL, NULL, &tv);
+    return select(STDIN_FILENO + 1, &fds, nullptr, nullptr, &tv);
 }
 
-
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[])
+{
     rclcpp::init(argc, argv);
     auto node = std::make_shared<KeyboardInput>();
     spin(node);

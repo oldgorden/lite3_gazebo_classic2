@@ -11,7 +11,8 @@ using namespace unitree::robot;
 
 JoystickInput::JoystickInput() : Node("unitree_joysick_node")
 {
-    publisher_ = create_publisher<control_input_msgs::msg::Inputs>("control_input", 10);
+    cmd_vel_publisher_ = create_publisher<geometry_msgs::msg::Twist>("/cmd_vel", 10);
+    robot_mode_publisher_ = create_publisher<std_msgs::msg::Int32>("/robot_mode", 10);
 
     declare_parameter("network_interface", network_interface_);
     declare_parameter("domain", domain_);
@@ -36,55 +37,34 @@ void JoystickInput::remoteWirelessHandle(const void* messages)
     wireless_controller_ = *static_cast<const unitree_go::msg::dds_::WirelessController_*>(messages);
     xKeySwitchUnion_.value = wireless_controller_.keys();
 
+    geometry_msgs::msg::Twist twist_msg;
+    twist_msg.linear.x = 0.4 * wireless_controller_.ly();
+    twist_msg.linear.y = -0.3 * wireless_controller_.lx();
+    twist_msg.angular.z = -0.2 * wireless_controller_.rx();
+    cmd_vel_publisher_->publish(twist_msg);
+
+    std_msgs::msg::Int32 mode_msg;
     if (xKeySwitchUnion_.components.select)
     {
-        inputs_.command = 1;
+        mode_msg.data = 1;
     }
     else if (xKeySwitchUnion_.components.start)
     {
-        inputs_.command = 2;
-    }
-    else if (xKeySwitchUnion_.components.right and xKeySwitchUnion_.components.B)
-    {
-        inputs_.command = 3;
-    }
-    else if (xKeySwitchUnion_.components.right and xKeySwitchUnion_.components.A)
-    {
-        inputs_.command = 4;
+        mode_msg.data = 2;
     }
     else if (xKeySwitchUnion_.components.right and xKeySwitchUnion_.components.X)
     {
-        inputs_.command = 5;
+        mode_msg.data = 3;
     }
     else if (xKeySwitchUnion_.components.right and xKeySwitchUnion_.components.Y)
     {
-        inputs_.command = 6;
-    }
-    else if (xKeySwitchUnion_.components.left and xKeySwitchUnion_.components.B)
-    {
-        inputs_.command = 7;
-    }
-    else if (xKeySwitchUnion_.components.left and xKeySwitchUnion_.components.A)
-    {
-        inputs_.command = 8;
-    }
-    else if (xKeySwitchUnion_.components.left and xKeySwitchUnion_.components.X)
-    {
-        inputs_.command = 9;
-    }
-    else if (xKeySwitchUnion_.components.left and xKeySwitchUnion_.components.Y)
-    {
-        inputs_.command = 10;
+        mode_msg.data = 4;
     }
     else
     {
-        inputs_.command = 0;
-        inputs_.lx = wireless_controller_.lx();
-        inputs_.ly = wireless_controller_.ly();
-        inputs_.rx = wireless_controller_.rx();
-        inputs_.ry = wireless_controller_.ry();
+        return;
     }
-    publisher_->publish(inputs_);
+    robot_mode_publisher_->publish(mode_msg);
 }
 
 int main(int argc, char* argv[])

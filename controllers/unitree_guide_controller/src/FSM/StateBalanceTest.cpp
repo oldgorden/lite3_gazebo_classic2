@@ -4,6 +4,8 @@
 
 #include "unitree_guide_controller/FSM/StateBalanceTest.h"
 
+#include <algorithm>
+
 #include <unitree_guide_controller/UnitreeGuideController.h>
 
 #include "unitree_guide_controller/common/mathTools.h"
@@ -43,11 +45,14 @@ void StateBalanceTest::enter() {
 }
 
 void StateBalanceTest::run(const rclcpp::Time &/*time*/, const rclcpp::Duration &/*period*/) {
-    pcd_(0) = pcd_init_(0) + invNormalize(ctrl_interfaces_.control_inputs_.ly, _xMin, _xMax);
-    pcd_(1) = pcd_init_(1) - invNormalize(ctrl_interfaces_.control_inputs_.lx, _yMin, _yMax);
-    pcd_(2) = pcd_init_(2) + invNormalize(ctrl_interfaces_.control_inputs_.ry, _zMin, _zMax);
+    const double x_cmd = std::clamp(ctrl_interfaces_.motion_command_.linear_x_ / 0.4, -1.0, 1.0);
+    const double y_cmd = std::clamp(ctrl_interfaces_.motion_command_.linear_y_ / 0.3, -1.0, 1.0);
+    const double yaw_cmd = std::clamp(ctrl_interfaces_.motion_command_.angular_z_ / 0.2, -1.0, 1.0);
+    pcd_(0) = pcd_init_(0) + invNormalize(x_cmd, _xMin, _xMax);
+    pcd_(1) = pcd_init_(1) - invNormalize(y_cmd, _yMin, _yMax);
+    pcd_(2) = pcd_init_(2);
 
-    const float yaw = -invNormalize(ctrl_interfaces_.control_inputs_.rx, _yawMin, _yawMax);
+    const float yaw = -invNormalize(yaw_cmd, _yawMin, _yawMax);
     Rd_ = rotz(yaw) * init_rotation_;
 
     for (int i = 0; i < 12; i++) {
@@ -63,10 +68,10 @@ void StateBalanceTest::exit() {
 }
 
 FSMStateName StateBalanceTest::checkChange() {
-    switch (ctrl_interfaces_.control_inputs_.command) {
-        case 1:
-            return FSMStateName::FIXEDDOWN;
-        case 2:
+    switch (ctrl_interfaces_.motion_command_.requested_state_) {
+        case FSMStateName::PASSIVE:
+            return FSMStateName::PASSIVE;
+        case FSMStateName::FIXEDSTAND:
             return FSMStateName::FIXEDSTAND;
         default:
             return FSMStateName::BALANCETEST;

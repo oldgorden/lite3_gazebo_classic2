@@ -5,21 +5,10 @@
 
 #ifndef KEYBOARDINPUT_H
 #define KEYBOARDINPUT_H
+#include <geometry_msgs/msg/twist.hpp>
 #include <rclcpp/rclcpp.hpp>
-#include <control_input_msgs/msg/inputs.hpp>
+#include <std_msgs/msg/int32.hpp>
 #include <termios.h>
-
-
-template <typename T1, typename T2>
-T1 max(const T1 a, const T2 b) {
-    return (a > b ? a : b);
-}
-
-template <typename T1, typename T2>
-T1 min(const T1 a, const T2 b) {
-    return (a < b ? a : b);
-}
-
 
 class KeyboardInput final : public rclcpp::Node {
 public:
@@ -31,21 +20,23 @@ public:
 
 private:
     void timer_callback();
-
-    void check_command(char key);
-    void check_value(char key);
+    void handle_key(char key);
+    void publish_mode(int mode);
+    void stop_motion();
 
     static bool kbhit();
 
-    control_input_msgs::msg::Inputs inputs_;
-    rclcpp::Publisher<control_input_msgs::msg::Inputs>::SharedPtr publisher_;
+    geometry_msgs::msg::Twist twist_msg_;
+    rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_publisher_;
+    rclcpp::Publisher<std_msgs::msg::Int32>::SharedPtr robot_mode_publisher_;
     rclcpp::TimerBase::SharedPtr timer_;
 
-    bool just_published_ = false;
-    int reset_count_ = 0;
-
-    float sensitivity_left_ = 0.05;
-    float sensitivity_right_ = 0.05;
+    double linear_step_ = 0.1;
+    double lateral_step_ = 0.1;
+    double angular_step_ = 0.1;
+    double max_linear_x_ = 0.4;
+    double max_linear_y_ = 0.3;
+    double max_angular_z_ = 0.2;
     termios old_tio_{}, new_tio_{};
 };
 

@@ -7,38 +7,32 @@
 using std::placeholders::_1;
 
 JoystickInput::JoystickInput() : Node("joysick_input_node") {
-    publisher_ = create_publisher<control_input_msgs::msg::Inputs>("control_input", 10);
+    cmd_vel_publisher_ = create_publisher<geometry_msgs::msg::Twist>("/cmd_vel", 10);
+    robot_mode_publisher_ = create_publisher<std_msgs::msg::Int32>("/robot_mode", 10);
     subscription_ = create_subscription<
         sensor_msgs::msg::Joy>("joy", 10, std::bind(&JoystickInput::joy_callback, this, _1));
 }
 
 void JoystickInput::joy_callback(sensor_msgs::msg::Joy::SharedPtr msg) {
+    geometry_msgs::msg::Twist twist_msg;
+    twist_msg.linear.x = 0.4 * msg->axes[1];
+    twist_msg.linear.y = -0.3 * msg->axes[0];
+    twist_msg.angular.z = -0.2 * msg->axes[3];
+    cmd_vel_publisher_->publish(twist_msg);
+
+    std_msgs::msg::Int32 mode_msg;
     if (msg->buttons[1] && msg->buttons[4]) {
-        inputs_.command = 1; // LB + B
+        mode_msg.data = 1; // LB + B -> passive
     } else if (msg->buttons[0] && msg->buttons[4]) {
-        inputs_.command = 2; // LB + A
+        mode_msg.data = 2; // LB + A -> fixeddown
     } else if (msg->buttons[2] && msg->buttons[4]) {
-        inputs_.command = 3; // LB + X
+        mode_msg.data = 3; // LB + X -> fixedstand
     } else if (msg->buttons[3] && msg->buttons[4]) {
-        inputs_.command = 4; // LB + Y
-    } else if (msg->axes[2] != 1 && msg->buttons[1]) {
-        inputs_.command = 5; // LT + B
-    } else if (msg->axes[2] != 1 && msg->buttons[0]) {
-        inputs_.command = 6; // LT + A
-    } else if (msg->axes[2] != 1 && msg->buttons[2]) {
-        inputs_.command = 7; // LT + X
-    } else if (msg->axes[2] != 1 && msg->buttons[3]) {
-        inputs_.command = 8; // LT + Y
-    } else if (msg->buttons[7]) {
-        inputs_.command = 9; // START
+        mode_msg.data = 4; // LB + Y -> trotting
     } else {
-        inputs_.command = 0;
-        inputs_.lx = -msg->axes[0];
-        inputs_.ly = msg->axes[1];
-        inputs_.rx = -msg->axes[3];
-        inputs_.ry = msg->axes[4];
+        return;
     }
-    publisher_->publish(inputs_);
+    robot_mode_publisher_->publish(mode_msg);
 }
 
 int main(int argc, char *argv[]) {

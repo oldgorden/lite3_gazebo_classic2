@@ -14,18 +14,18 @@ FSMStateName StateFixedStand::checkChange() {
     if (percent_ < 1.5) {
         return FSMStateName::FIXEDSTAND;
     }
-    switch (ctrl_interfaces_.control_inputs_.command) {
-        case 1:
+    switch (ctrl_interfaces_.motion_command_.requested_state_) {
+        case FSMStateName::PASSIVE:
             return FSMStateName::PASSIVE;
-        case 2:
+        case FSMStateName::FIXEDDOWN:
             return FSMStateName::FIXEDDOWN;
-        case 3:
+        case FSMStateName::FREESTAND:
             return FSMStateName::FREESTAND;
-        case 4:
+        case FSMStateName::TROTTING:
             return FSMStateName::TROTTING;
-        case 5:
+        case FSMStateName::SWINGTEST:
             return FSMStateName::SWINGTEST;
-        case 6:
+        case FSMStateName::BALANCETEST:
             return FSMStateName::BALANCETEST;
         default:
             return FSMStateName::FIXEDSTAND;

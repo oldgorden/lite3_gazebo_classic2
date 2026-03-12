@@ -12,8 +12,8 @@
     <depend>backward_ros</depend>
     <depend>controller_interface</depend>
     <depend>controller_common</depend>
+    <depend>geometry_msgs</depend>
     <depend>pluginlib</depend>
-    <depend>control_input_msgs</depend>
     <depend>kdl_parser</depend>
     <depend>orocos_kdl</depend>
 

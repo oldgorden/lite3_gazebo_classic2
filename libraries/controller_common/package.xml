@@ -10,7 +10,6 @@
     <buildtool_depend>ament_cmake</buildtool_depend>
 
     <depend>hardware_interface</depend>
-    <depend>control_input_msgs</depend>
     <depend>rclcpp</depend>
 
     <test_depend>ament_lint_auto</test_depend>

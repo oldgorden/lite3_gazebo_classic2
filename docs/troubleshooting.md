@@ -263,7 +263,8 @@ colcon build --symlink-install
 # 确保已按 '2' 或 '4' 切换到站立或小跑模式
 
 # 2. 检查话题
-ros2 topic echo /control_input
+ros2 topic echo /robot_mode
+ros2 topic echo /cmd_vel
 
 # 3. 检查控制器状态
 ros2 lifecycle list

@@ -33,7 +33,6 @@ void StatePassive::enter()
     {
         i.get().set_value(1);
     }
-    ctrl_interfaces_.control_inputs_.command = 0;
 }
 
 void StatePassive::run(const rclcpp::Time&/*time*/, const rclcpp::Duration&/*period*/)
@@ -46,7 +45,7 @@ void StatePassive::exit()
 
 FSMStateName StatePassive::checkChange()
 {
-    if (ctrl_interfaces_.control_inputs_.command == 2)
+    if (ctrl_interfaces_.motion_command_.requested_state_ == FSMStateName::FIXEDDOWN)
     {
         return FSMStateName::FIXEDDOWN;
     }

@@ -9,8 +9,9 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
+find_package(geometry_msgs REQUIRED)
 find_package(rclcpp REQUIRED)
-find_package(control_input_msgs REQUIRED)
+find_package(std_msgs REQUIRED)
 find_package(unitree_sdk2 REQUIRED)
 
 include(GNUInstallDirs)
@@ -23,9 +24,10 @@ target_include_directories(joystick_input
 target_link_libraries(joystick_input unitree_sdk2)
 ament_target_dependencies(
         joystick_input
+        geometry_msgs
         rclcpp
+        std_msgs
         unitree_sdk2
-        control_input_msgs
 )
 
 install(TARGETS

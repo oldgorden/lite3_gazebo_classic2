@@ -11,7 +11,6 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(dependencies
         hardware_interface
-        control_input_msgs
         rclcpp
 )
 

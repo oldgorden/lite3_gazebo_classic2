@@ -33,7 +33,6 @@ void BaseFixedStand::enter()
         ctrl_interfaces_.joint_kp_command_interface_[i].get().set_value(kp_);
         ctrl_interfaces_.joint_kd_command_interface_[i].get().set_value(kd_);
     }
-    ctrl_interfaces_.control_inputs_.command = 0;
 }
 
 void BaseFixedStand::run(const rclcpp::Time&/*time*/, const rclcpp::Duration&/*period*/)
@@ -58,11 +57,11 @@ FSMStateName BaseFixedStand::checkChange()
     {
         return FSMStateName::FIXEDSTAND;
     }
-    switch (ctrl_interfaces_.control_inputs_.command)
+    switch (ctrl_interfaces_.motion_command_.requested_state_)
     {
-    case 1:
+    case FSMStateName::PASSIVE:
         return FSMStateName::PASSIVE;
-    case 2:
+    case FSMStateName::FIXEDDOWN:
         return FSMStateName::FIXEDDOWN;
     default:
         return FSMStateName::FIXEDSTAND;

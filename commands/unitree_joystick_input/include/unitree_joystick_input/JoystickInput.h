@@ -3,10 +3,10 @@
 //
 #pragma once
 
-
+#include <geometry_msgs/msg/twist.hpp>
 #include <rclcpp/rclcpp.hpp>
+#include <std_msgs/msg/int32.hpp>
 #include <unitree/idl/go2/WirelessController_.hpp>
-#include <control_input_msgs/msg/inputs.hpp>
 #include <unitree/robot/channel/channel_subscriber.hpp>
 
 
@@ -49,7 +49,7 @@ private:
     unitree_go::msg::dds_::WirelessController_ wireless_controller_{};
     xKeySwitchUnion xKeySwitchUnion_{};
 
-    control_input_msgs::msg::Inputs inputs_;
-    rclcpp::Publisher<control_input_msgs::msg::Inputs>::SharedPtr publisher_;
+    rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_publisher_;
+    rclcpp::Publisher<std_msgs::msg::Int32>::SharedPtr robot_mode_publisher_;
     unitree::robot::ChannelSubscriberPtr<unitree_go::msg::dds_::WirelessController_> subscriber_;
 };

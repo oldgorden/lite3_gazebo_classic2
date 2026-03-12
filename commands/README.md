@@ -1,3 +1,3 @@
 # Control Command Inputs
 
-This folder contains the ros2 node for control input, like keyboard or gamepad.
+This folder contains user input nodes that publish standard control topics such as `/cmd_vel` and `/robot_mode`.

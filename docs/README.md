@@ -8,18 +8,11 @@
 
 | 文档 | 说明 |
 |------|------|
+| [控制接口规范](./control_interface_spec.md) | 标准控制接口基线 |
 | [传感器配置](./sensor_configuration.md) | 传感器配置和使用（**新增**） |
 | [键盘控制指南](./keyboard_control_guide.md) | 键盘控制使用说明（**新增**） |
 | [故障排除](./troubleshooting.md) | 常见问题及解决方案（**新增**） |
-
-### 技术文档
-
-| 文档 | 说明 |
-|------|------|
-| [Gazebo Livox 集成](./gazebo_livox_integration.md) | Livox 雷达集成指南 |
-| [Realsense 配置总结](./realsense_configuration_summary.md) | Realsense 相机配置 |
-
----
+| [FAST-LIVO2 Rcl 分析](./fastlivo2_rcl_analysis.md) | LiDAR-相机外参分析记录 |
 
 ## 文档更新历史
 
@@ -66,13 +59,11 @@
 | 按键 | 功能 |
 |------|------|
 | `1` | 被动模式（Passive） |
-| `2` | 固定站立（Fixed Stand） |
-| `3` | 自由站立（Free Stand） |
+| `2` | 收腿模式（FixedDown） |
+| `3` | 站立模式（FixedStand） |
 | `4` | 小跑模式（Trot） |
-| `5` | 摆腿测试（Swing Test） |
-| `6` | 平衡模式（Balance） |
 | `W/S/A/D` | 前后左右移动 |
-| `I/K/J/L` | 旋转控制 |
+| `Q/E` | 旋转控制 |
 | `空格` | 停止运动 |
 
 详细控制说明请参考 [键盘控制指南](./keyboard_control_guide.md)。
@@ -142,8 +133,8 @@ pkill -f gz && pkill -f gazebo && pkill -f ros2
 ```
 docs/
 ├── README.md                 # 本文档（文档索引）
-├── sensor_configuration.md   # 传感器配置（新增）
-├── keyboard_control_guide.md # 键盘控制指南（新增）
-├── troubleshooting.md        # 故障排除（新增）
-├── gazebo_livox_integration.md
-└── realsense_configuration_summary.md
+├── sensor_configuration.md   # 传感器配置
+├── keyboard_control_guide.md # 键盘控制指南
+├── troubleshooting.md        # 故障排除
+├── control_interface_spec.md # 控制接口规范
+└── fastlivo2_rcl_analysis.md # Rcl 分析记录

@@ -4,6 +4,8 @@
 
 #include "unitree_guide_controller/FSM/StateFreeStand.h"
 
+#include <algorithm>
+
 #include <unitree_guide_controller/UnitreeGuideController.h>
 
 #include "unitree_guide_controller/common/mathTools.h"
@@ -39,24 +41,26 @@ void StateFreeStand::enter() {
         foot_pos.p -= fr_init_pos_.p;
         foot_pos.M = KDL::Rotation::RPY(0, 0, 0);
     }
-    ctrl_interfaces_.control_inputs_.command = 0;
 }
 
 void StateFreeStand::run(const rclcpp::Time &/*time*/, const rclcpp::Duration &/*period*/) {
-    calc_body_target(invNormalize(ctrl_interfaces_.control_inputs_.lx, row_min_, row_max_),
-                     invNormalize(ctrl_interfaces_.control_inputs_.ly, pitch_min_, pitch_max_),
-                     invNormalize(ctrl_interfaces_.control_inputs_.rx, yaw_min_, yaw_max_),
-                     invNormalize(ctrl_interfaces_.control_inputs_.ry, height_min_, height_max_));
+    const double row_cmd = std::clamp(ctrl_interfaces_.motion_command_.linear_y_ / 0.3, -1.0, 1.0);
+    const double pitch_cmd = std::clamp(ctrl_interfaces_.motion_command_.linear_x_ / 0.4, -1.0, 1.0);
+    const double yaw_cmd = std::clamp(ctrl_interfaces_.motion_command_.angular_z_ / 0.2, -1.0, 1.0);
+    calc_body_target(invNormalize(row_cmd, row_min_, row_max_),
+                     invNormalize(pitch_cmd, pitch_min_, pitch_max_),
+                     invNormalize(yaw_cmd, yaw_min_, yaw_max_),
+                     0.0);
 }
 
 void StateFreeStand::exit() {
 }
 
 FSMStateName StateFreeStand::checkChange() {
-    switch (ctrl_interfaces_.control_inputs_.command) {
-        case 1:
+    switch (ctrl_interfaces_.motion_command_.requested_state_) {
+        case FSMStateName::PASSIVE:
             return FSMStateName::PASSIVE;
-        case 2:
+        case FSMStateName::FIXEDSTAND:
             return FSMStateName::FIXEDSTAND;
         default:
             return FSMStateName::FREESTAND;

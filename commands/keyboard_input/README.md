@@ -1,33 +1,20 @@
-# Keyboard Input
+# keyboard_input
 
-This node will read the keyboard input and publish a control_input_msgs/Input message.
+Lite3 主控制链的键盘遥操作节点。
 
-Tested environment:
-* Ubuntu 24.04
-  * ROS2 Jazzy
-* Ubuntu 22.04
-  * ROS2 Humble
+## 输出话题
 
-### Build Command
+- `/cmd_vel`
+- `/robot_mode`
+
+## 运行
+
 ```bash
-cd ~/ros2_ws
-colcon build --packages-up-to keyboard_input
-```
-
-### Launch Command
-```bash
-source ~/ros2_ws/install/setup.bash
+source install/setup.bash
 ros2 run keyboard_input keyboard_input
 ```
 
-## 1. Use Instructions for Unitree Guide
-### 1.1 Control Mode
-* Passive Mode: Keyboard 1
-* Fixed Stand: Keyboard 2
-    * Free Stand: Keyboard 3
-    * Trot: Keyboard 4
-    * SwingTest: Keyboard 5
-    * Balance: Keyboard 6
-### 1.2 Control Input
-* WASD IJKL: Move robot
-* Space: Reset Speed Input
+## 参考
+
+- 完整按键说明见 [keyboard_control_guide.md](/home/longkang/quadruped_ws/src/lite3_gazebo_classic/docs/keyboard_control_guide.md)
+- 标准接口定义见 [control_interface_spec.md](/home/longkang/quadruped_ws/src/lite3_gazebo_classic/docs/control_interface_spec.md)

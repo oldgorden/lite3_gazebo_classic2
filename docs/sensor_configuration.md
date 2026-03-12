@@ -163,7 +163,7 @@ base
 | 话题名称 | 消息类型 | 说明 |
 |----------|----------|------|
 | `/cmd_vel` | geometry_msgs/msg/Twist | 速度指令 |
-| `/control_input` | control_input_msgs/msg/Inputs | 控制器输入 |
+| `/robot_mode` | std_msgs/msg/Int32 | 模式切换指令 |
 
 ---
 
@@ -221,5 +221,4 @@ ls $(pwd)/install/ros2_livox_simulation/lib/libros2_livox.so
 - 统一 TF 管理方式
 
 ### 参考文档
-- [Gazebo Livox 集成指南](./gazebo_livox_integration.md)
-- [Realsense 配置总结](./realsense_configuration_summary.md)
+- [FAST-LIVO2 Rcl 分析](./fastlivo2_rcl_analysis.md)
